@@ -1,1721 +1,606 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guardian — Full Presentation</title>
+<title>Guardian — Pre-seed</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&display=swap" rel="stylesheet">
-
-<style>
-/* ─── Reset ────────────────────────────────────────────── */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-/* ─── Tokens ───────────────────────────────────────────── */
-:root {
-  --bg:           #121212;
-  --surface:      #1a1a1a;
-  --text:         #ededed;
-  --muted:        #5a5a5a;
-  --muted-light:  #888;
-  --green:        #34d399;
-  --green-dim:    rgba(52,211,153,0.15);
-  --green-glow:   rgba(52,211,153,0.2);
-  --red:          #f87171;
-  --red-dim:      rgba(248,113,113,0.15);
-  --amber:        #fbbf24;
-  --blue:         #60a5fa;
-
-  --border:       rgba(255,255,255,0.08);
-  --border-hover: rgba(255,255,255,0.14);
-  --glass-bg:     rgba(255,255,255,0.03);
-  --radius:       20px;
-}
-
-/* ─── Base ─────────────────────────────────────────────── */
-html, body {
-  height: 100%;
-  font-family: 'Inter', -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ─── Grain ────────────────────────────────────────────── */
-body::after {
-  content: '';
-  position: fixed; inset: 0; z-index: 9998; pointer-events: none;
-  opacity: 0.028;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
-}
-
-/* ─── Ambient orbs ─────────────────────────────────────── */
-.orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.orb { position: absolute; border-radius: 50%; filter: blur(130px); }
-
-.orb-1 {
-  width: 800px; height: 800px; top: -250px; left: -200px;
-  background: radial-gradient(circle, rgba(109,40,217,0.12) 0%, transparent 65%);
-  animation: drift1 22s ease-in-out infinite;
-}
-.orb-2 {
-  width: 650px; height: 650px; bottom: -250px; right: -150px;
-  background: radial-gradient(circle, rgba(52,211,153,0.09) 0%, transparent 65%);
-  animation: drift2 18s ease-in-out infinite;
-}
-.orb-3 {
-  width: 550px; height: 550px; top: 35%; left: 50%;
-  background: radial-gradient(circle, rgba(96,165,250,0.06) 0%, transparent 65%);
-  animation: drift3 26s ease-in-out infinite;
-}
-
-@keyframes drift1 {
-  0%, 100% { transform: translate(0,0) scale(1); }
-  40%       { transform: translate(40px,-50px) scale(1.06); }
-  70%       { transform: translate(-25px,35px) scale(0.96); }
-}
-@keyframes drift2 {
-  0%, 100% { transform: translate(0,0) scale(1); }
-  35%       { transform: translate(-35px,45px) scale(1.04); }
-  65%       { transform: translate(20px,-30px) scale(0.97); }
-}
-@keyframes drift3 {
-  0%, 100% { transform: translate(0,0) scale(1); }
-  50%       { transform: translate(-40px,-50px) scale(1.08); }
-}
-
-/* ─── Progress bar ─────────────────────────────────────── */
-.progress-bar {
-  position: fixed; top: 0; left: 0; z-index: 9999;
-  height: 2px;
-  background: linear-gradient(90deg, var(--green), rgba(52,211,153,0.3));
-  box-shadow: 0 0 16px var(--green-glow);
-  transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
-}
-
-/* ─── Deck & slides ────────────────────────────────────── */
-.deck { height: 100vh; position: relative; }
-
-.slide {
-  position: absolute; inset: 0; z-index: 1;
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-  padding: 72px 104px;
-  opacity: 0; pointer-events: none;
-  transform: scale(0.982) translateY(14px);
-  transition:
-    opacity 0.52s cubic-bezier(0.16,1,0.3,1),
-    transform 0.52s cubic-bezier(0.16,1,0.3,1);
-}
-.slide.active { opacity: 1; pointer-events: all; transform: scale(1) translateY(0); }
-.slide.exit   { opacity: 0; transform: scale(1.012) translateY(-10px); }
-.slide.left   { align-items: flex-start; }
-
-/* ─── Entrance animations ─────────────────────────────── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.slide.active .anim {
-  animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
-}
-.slide.active .a1 { animation-delay: 0.04s; }
-.slide.active .a2 { animation-delay: 0.12s; }
-.slide.active .a3 { animation-delay: 0.20s; }
-.slide.active .a4 { animation-delay: 0.28s; }
-.slide.active .a5 { animation-delay: 0.36s; }
-.slide.active .a6 { animation-delay: 0.44s; }
-
-/* ─── Navigation ───────────────────────────────────────── */
-.nav {
-  position: fixed; bottom: 40px; right: 48px; z-index: 9999;
-  display: flex; gap: 8px; align-items: center;
-}
-.nav button {
-  width: 38px; height: 38px; border-radius: 10px; cursor: pointer;
-  font-size: 14px; display: flex; align-items: center; justify-content: center;
-  font-family: inherit;
-  background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  color: var(--muted-light);
-  transition: all 0.18s ease;
-}
-.nav button:hover {
-  color: var(--text); border-color: var(--border-hover);
-  background: rgba(255,255,255,0.07);
-}
-.nav .counter {
-  font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums;
-  padding: 0 10px; min-width: 48px; text-align: center; font-weight: 500;
-  letter-spacing: 0.5px;
-}
-
-/* ─── Brand watermark ──────────────────────────────────── */
-.brand {
-  position: fixed; bottom: 48px; left: 48px; z-index: 9999;
-  font-size: 10px; font-weight: 800; color: var(--green); opacity: 0.2;
-  letter-spacing: 5px; text-transform: uppercase;
-}
-
-/* ─── Eyebrow label ────────────────────────────────────── */
-.label {
-  font-size: 10px; font-weight: 700; letter-spacing: 3.5px; text-transform: uppercase;
-  color: var(--green); margin-bottom: 28px;
-  display: inline-flex; align-items: center; gap: 12px;
-}
-.label::before {
-  content: ''; width: 20px; height: 1px;
-  background: linear-gradient(90deg, var(--green), transparent);
-}
-
-/* ─── Type scale ───────────────────────────────────────── */
-h1 { font-size: 92px; font-weight: 800; line-height: 1.0; letter-spacing: -4.5px; }
-h2 { font-size: 52px; font-weight: 800; line-height: 1.1; letter-spacing: -2.5px; }
-
-.subtitle {
-  font-size: 20px; color: var(--muted-light); font-weight: 400;
-  margin-top: 28px; line-height: 1.8; max-width: 540px;
-}
-.subtitle.wide { max-width: 680px; }
-
-.big-stat { font-size: 128px; font-weight: 900; letter-spacing: -7px; line-height: 1; }
-
-.source {
-  position: absolute;
-  bottom: 56px; left: 104px;
-  font-size: 11px; color: var(--muted); opacity: 0.4;
-  letter-spacing: 0.2px;
-}
-.source.centered {
-  position: static;
-  margin-top: 24px;
-  text-align: center;
-}
-
-/* ─── Glass card ───────────────────────────────────────── */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.04) inset,
-    0 8px 32px rgba(0,0,0,0.4),
-    0 24px 64px rgba(0,0,0,0.2);
-  border-radius: var(--radius);
-  position: relative; overflow: hidden;
-}
-.glass::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.07) 50%, transparent 95%);
-}
-
-/* ─── Stat cards ──────────────────────────────────────── */
-.stat-card {
-  flex: 1; padding: 40px 28px; text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 14px;
-}
-.stat-card .val {
-  font-size: 58px; font-weight: 900; letter-spacing: -3px; line-height: 1;
-}
-.stat-card .val .unit { font-size: 30px; font-weight: 700; opacity: 0.6; }
-.stat-card .desc { font-size: 14px; color: var(--muted-light); line-height: 1.7; }
-.stat-card .icon-wrap {
-  width: 48px; height: 48px; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-}
-
-/* ─── Flow diagram ───────────────────────────────────── */
-.flow {
-  display: flex; align-items: stretch; gap: 0; width: 100%;
-  position: relative;
-}
-.flow::before {
-  content: '';
-  position: absolute;
-  top: 50%; left: 40px; right: 40px;
-  height: 1px;
-  background: linear-gradient(90deg,
-    rgba(52,211,153,0.3),
-    rgba(248,113,113,0.3),
-    rgba(96,165,250,0.3),
-    rgba(251,191,36,0.3)
-  );
-  z-index: 0;
-}
-.flow-node {
-  flex: 1; padding: 32px 18px; border-radius: 18px; text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
-  background: rgba(18,18,18,0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  position: relative; z-index: 1;
-  margin: 0 8px;
-}
-.flow-node .fn-icon {
-  width: 52px; height: 52px; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-}
-.flow-node .fn-icon svg { width: 26px; height: 26px; }
-.flow-node .fn-title {
-  font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
-}
-.flow-node .fn-detail { font-size: 12px; color: var(--muted-light); line-height: 1.6; }
-.flow-node .fn-action { font-size: 11px; font-weight: 700; margin-top: auto; padding-top: 8px; }
-
-/* ─── Pulse dot ────────────────────────────────────────── */
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.6); }
-  50%       { box-shadow: 0 0 0 18px rgba(52,211,153,0); }
-}
-.pulse-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--green);
-  animation: pulse 2.2s ease-in-out infinite;
-  display: inline-block; margin-right: 8px; vertical-align: middle;
-}
-
-/* ─── Gradient text ────────────────────────────────────── */
-.grad-text {
-  background: linear-gradient(150deg, #fff 25%, rgba(229,229,229,0.5) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.grad-green {
-  background: linear-gradient(135deg, #fff 0%, #34d399 50%, #60a5fa 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ─── Glow effects ────────────────────────────────────── */
-.glow-red   { text-shadow: 0 0 80px rgba(248,113,113,0.5), 0 0 200px rgba(248,113,113,0.15); }
-.glow-green { text-shadow: 0 0 80px rgba(52,211,153,0.5),  0 0 200px rgba(52,211,153,0.15); }
-
-/* ─── Custom bar chart ───────────────────────────────── */
-.bar-chart {
-  display: flex; align-items: flex-end; gap: 0;
-  height: 300px; width: 100%;
-  position: relative;
-}
-.bar-chart::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: rgba(255,255,255,0.06);
-}
-.bar-group {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  height: 100%; justify-content: flex-end;
-  padding: 0 6px;
-}
-.bar-value {
-  font-size: 14px; font-weight: 700; color: rgba(237,237,237,0.85);
-  margin-bottom: 10px; letter-spacing: -0.3px;
-}
-.bar-fill {
-  width: 100%; border-radius: 8px 8px 0 0;
-  position: relative;
-  transition: height 1s cubic-bezier(0.16,1,0.3,1);
-  height: 0;
-}
-.bar-fill::after {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  border-radius: 8px 8px 0 0;
-  background: rgba(255,255,255,0.25);
-}
-.bar-year {
-  font-size: 13px; font-weight: 600; color: var(--muted);
-  margin-top: 14px; letter-spacing: 0.5px;
-}
-.bar-group.highlight .bar-value { color: #fca5a5; font-weight: 800; font-size: 16px; }
-.bar-group.highlight .bar-fill { box-shadow: 0 -8px 40px rgba(248,113,113,0.25), 0 0 60px rgba(248,113,113,0.1); }
-.bar-group.highlight .bar-year { color: var(--red); font-weight: 700; }
-
-/* ─── SVG donut ──────────────────────────────────────── */
-.donut-wrap {
-  position: relative; flex-shrink: 0;
-  width: 340px; height: 340px;
-}
-.donut-wrap svg { width: 100%; height: 100%; }
-.donut-segment {
-  fill: none; stroke-width: 28;
-  stroke-linecap: round;
-  transform-origin: center;
-  transition: stroke-dashoffset 1.2s cubic-bezier(0.16,1,0.3,1);
-}
-.donut-glow {
-  fill: none; stroke-width: 32;
-  stroke-linecap: round;
-  transform-origin: center;
-  filter: blur(12px);
-  opacity: 0.4;
-}
-.donut-center {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  pointer-events: none;
-}
-
-/* ─── Cost bars ──────────────────────────────────────── */
-.cost-row {
-  display: flex; align-items: center; gap: 16px; width: 100%;
-  padding: 6px 0;
-}
-.cost-label {
-  width: 190px; flex-shrink: 0;
-  font-size: 13px; color: var(--muted-light); text-align: right;
-  font-weight: 500;
-}
-.cost-bar-track {
-  flex: 1; height: 28px; border-radius: 6px;
-  background: rgba(255,255,255,0.025);
-  position: relative; overflow: hidden;
-}
-.cost-bar-fill {
-  height: 100%; border-radius: 6px;
-  transition: width 0.9s cubic-bezier(0.16,1,0.3,1);
-}
-.cost-bar-fill.guardian-bar {
-  box-shadow: 0 0 20px rgba(52,211,153,0.6), 0 0 50px rgba(52,211,153,0.2);
-  min-width: 12px;
-}
-.cost-price {
-  width: 90px; flex-shrink: 0;
-  font-size: 14px; font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ─── Market circles ─────────────────────────────────── */
-.market-viz {
-  position: relative; flex-shrink: 0;
-  width: 300px; height: 300px;
-  display: flex; align-items: center; justify-content: center;
-}
-.market-ring {
-  position: absolute; border-radius: 50%;
-  border: 2px solid;
-}
-
-/* ─── Hero cents ─────────────────────────────────────── */
-.hero-cents {
-  font-size: 160px; font-weight: 900; letter-spacing: -10px; line-height: 1;
-  color: var(--green);
-  text-shadow: 0 0 120px rgba(52,211,153,0.5), 0 0 280px rgba(52,211,153,0.18);
-  position: relative;
-}
-
-/* ─── Team avatars ────────────────────────────────────── */
-.avatar {
-  width: 80px; height: 80px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 900; font-size: 18px;
-  margin: 0 auto 14px;
-  border: 1.5px solid rgba(52,211,153,0.18);
-  background: radial-gradient(135deg, rgba(52,211,153,0.12), rgba(52,211,153,0.02));
-}
-
-/* ─── Architecture diagram (NEW) ─────────────────────── */
-.arch-diagram {
-  display: flex; align-items: center; gap: 0; width: 100%;
-  max-width: 1000px; position: relative;
-}
-.arch-node {
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 24px 16px; text-align: center;
-  position: relative; z-index: 2;
-}
-.arch-icon {
-  width: 68px; height: 68px; border-radius: 18px;
-  display: flex; align-items: center; justify-content: center;
-  border: 1.5px solid;
-  position: relative;
-}
-.arch-icon svg { width: 32px; height: 32px; }
-.arch-label {
-  font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
-}
-.arch-sub {
-  font-size: 11px; color: var(--muted); line-height: 1.5;
-  max-width: 130px;
-}
-.arch-arrow {
-  flex-shrink: 0; display: flex; align-items: center;
-  position: relative; z-index: 1;
-}
-.arch-arrow svg { width: 48px; height: 20px; }
-
-/* ─── Call walkthrough (NEW) ─────────────────────────── */
-.walkthrough {
-  display: flex; flex-direction: column; gap: 0;
-  width: 100%; max-width: 900px;
-  position: relative;
-}
-.walkthrough::before {
-  content: '';
-  position: absolute;
-  top: 0; bottom: 0; left: 31px;
-  width: 2px;
-  background: linear-gradient(to bottom,
-    rgba(52,211,153,0.4),
-    rgba(96,165,250,0.4),
-    rgba(251,191,36,0.4),
-    rgba(52,211,153,0.4)
-  );
-  z-index: 0;
-}
-.wt-step {
-  display: flex; align-items: flex-start; gap: 20px;
-  padding: 12px 0;
-  position: relative; z-index: 1;
-}
-.wt-dot {
-  width: 24px; height: 24px; border-radius: 50%;
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 900; color: #121212;
-  margin-top: 2px;
-  position: relative;
-  left: 20px;
-}
-.wt-content {
-  flex: 1;
-  padding-left: 16px;
-}
-.wt-title {
-  font-size: 15px; font-weight: 700; letter-spacing: -0.3px;
-}
-.wt-desc {
-  font-size: 13px; color: var(--muted-light); margin-top: 4px; line-height: 1.6;
-}
-.wt-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 3px 10px; border-radius: 6px;
-  font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
-  text-transform: uppercase; margin-top: 6px;
-}
-
-/* ─── Phone mockup (NEW) ─────────────────────────────── */
-.phone-frame {
-  width: 240px; height: 500px;
-  border-radius: 36px;
-  border: 2.5px solid #2e2e2e;
-  overflow: hidden;
-  background: #0c0c10;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06), 0 0 60px rgba(0,0,0,0.5);
-  display: flex; flex-direction: column;
-  flex-shrink: 0;
-}
-.phone-notch {
-  width: 80px; height: 20px; background: #000; border-radius: 12px;
-  margin: 0 auto; position: relative; top: 4px;
-}
-.phone-status {
-  display: flex; justify-content: space-between;
-  padding: 8px 18px 4px; font-size: 11px; font-weight: 600; color: #888;
-}
-.phone-body {
-  flex: 1; display: flex; flex-direction: column;
-  overflow: hidden;
-}
-.phone-nav {
-  display: flex; border-top: 1px solid rgba(255,255,255,0.06);
-  padding: 10px 0 16px;
-}
-.phone-nav-item {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-  font-size: 9px; font-weight: 600; color: #444;
-}
-.phone-nav-item.active { color: var(--green); }
-.phone-nav-item svg { width: 18px; height: 18px; }
-
-/* ─── Layout helpers ──────────────────────────────────── */
-.row    { display: flex; gap: 20px; width: 100%; }
-.w-full { width: 100%; }
-.mt-8   { margin-top: 8px; }
-.mt-16  { margin-top: 16px; }
-.mt-24  { margin-top: 24px; }
-.mt-32  { margin-top: 32px; }
-.mt-40  { margin-top: 40px; }
-.mt-48  { margin-top: 48px; }
-.mt-64  { margin-top: 64px; }
-
-/* ─── Responsive ──────────────────────────────────────── */
-@media (max-width: 1200px) {
-  .slide { padding: 56px 72px; }
-  h1 { font-size: 76px !important; letter-spacing: -4px !important; }
-  h2 { font-size: 44px; }
-  .big-stat { font-size: 108px; }
-  .hero-cents { font-size: 130px; }
-  .source { left: 72px; }
-}
-@media (max-width: 900px) {
-  .slide { padding: 48px 44px; }
-  h1 { font-size: 58px !important; letter-spacing: -3px !important; }
-  h2 { font-size: 34px; letter-spacing: -1.5px; }
-  .big-stat { font-size: 84px; }
-  .row { flex-direction: column; }
-  .flow { flex-direction: column; }
-  .flow::before { display: none; }
-  .hero-cents { font-size: 100px; letter-spacing: -6px; }
-  .brand { display: none; }
-  .cost-label { width: 140px; font-size: 11px; }
-  .source { left: 44px; }
-  .bar-chart { height: 220px; }
-  .phone-frame { width: 200px; height: 420px; }
-}
-@media (max-width: 600px) {
-  .slide { padding: 36px 28px; }
-  .stat-card .val { font-size: 48px; }
-  .source { left: 28px; }
-}
-</style>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pitch.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 </head>
 <body>
 
-<div class="orbs" aria-hidden="true">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-</div>
-
-<div class="progress-bar" id="progress" style="width: 6.67%"></div>
-
-<div class="deck" id="deck">
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 1 — The WHY
-════════════════════════════════════════════════════════ -->
-<div class="slide active">
-  <div style="position:absolute;width:560px;height:560px;border-radius:50%;
-    background:radial-gradient(circle,rgba(248,113,113,0.13) 0%,transparent 65%);
-    filter:blur(80px);pointer-events:none;z-index:0;"></div>
-
-  <div style="position:relative;z-index:1;text-align:center;width:100%;max-width:900px;">
-    <div class="label anim a1" style="justify-content:center;">Why this matters</div>
-    <h2 class="anim a2" style="font-size:46px;line-height:1.25;max-width:780px;margin:0 auto;">
-      Your grandmother picks up the phone.<br>
-      A stranger claims to be from <span style="color:var(--red);">Medicare</span>.<br>
-      <span style="color:var(--muted);">Twenty minutes later, she's given away everything.</span>
-    </h2>
-
-    <p class="anim a3" style="font-size:17px;color:var(--muted-light);margin-top:32px;line-height:1.8;max-width:620px;margin-left:auto;margin-right:auto;">
-      This isn't hypothetical. It happens to <strong style="color:var(--text);">201,000 elderly Americans every year</strong>.
-      The average victim loses <strong style="color:var(--red);">$38,000</strong> &mdash; often their entire retirement savings.
-      Most never recover. Most never report it.
-    </p>
-
-    <div class="anim a4" style="margin-top:40px;">
-      <div class="big-stat glow-red" style="color:var(--red);font-size:96px;">
-        $<span class="count-up" data-target="81.5" data-decimals="1">0</span>B
-      </div>
-      <p style="font-size:14px;color:var(--muted);margin-top:8px;">lost to elder fraud every year &mdash; FTC 2025</p>
+<!-- SLIDE 01 — HERO (dark) -->
+<section class="slide dark active" id="s1">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">01 / 18</span></div>
+  <div class="content" style="justify-content: center; align-items: center; text-align: center;">
+    <div class="stack gapy-lg" style="align-items: center; max-width: 640px;">
+      <p class="eye" id="s1-eye" style="opacity: 0;">Pre-seed · April 2026</p>
+      <h1 class="hero" id="s1-title" style="color: var(--paper); opacity: 0;">GUARDIAN</h1>
+      <hr class="rule" id="s1-rule" style="width: 80px; opacity: 0;">
+      <p class="body-lg" id="s1-sub" style="color: var(--paper-mu); opacity: 0; max-width: 440px;">Infrastructure-level call screening that protects the people who raised you.</p>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 2 — Scale
-════════════════════════════════════════════════════════ -->
-<div class="slide">
-  <div class="label anim a1" style="justify-content:center;">The scale of the crisis</div>
-  <h2 class="anim a2" style="text-align:center;font-size:40px;margin-bottom:8px;">
-    Seniors are 15% of the population &mdash; but <span style="color:var(--red);">30% of fraud victims</span>
-  </h2>
-  <p class="anim a3" style="text-align:center;font-size:15px;color:var(--muted);max-width:600px;margin-bottom:36px;">
-    Phone scams disproportionately target the elderly because they answer the phone, they trust authority, and they're often isolated.
-  </p>
-
-  <div class="row anim a4" style="max-width:940px;">
-    <div class="glass stat-card">
-      <div class="icon-wrap" style="background:var(--red-dim);">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-        </svg>
-      </div>
-      <div class="val" style="color:var(--red);">
-        <span class="count-up" data-target="144">0</span><span class="unit">M</span>
-      </div>
-      <div class="desc">robocalls per day in the US<br><span style="color:var(--muted);font-size:12px;">52.5 billion in 2025 alone</span></div>
+<!-- SLIDE 02 — PROBLEM (bar chart) -->
+<section class="slide" id="s2">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">02 / 18</span></div>
+  <div class="content row gapy-xl" style="align-items: stretch; gap: 56px;">
+    <div class="stack gapy-md" style="flex: 1; justify-content: center; max-width: 480px;">
+      <p class="eye" id="s2-eye" style="opacity: 0;">The Problem · FBI IC3 2024</p>
+      <h2 class="h1" id="s2-title" style="opacity: 0;">Seniors lost <span class="accent">$4.8B</span> to phone scams last year.</h2>
+      <p class="body-lg" id="s2-body" style="opacity: 0;">Fraud against Americans 60+ has grown every year since 2020. The curve is not bending. Scammers have better tools than the people defending them.</p>
+      <p class="src" id="s2-src" style="opacity: 0; margin-top: 4px;">Source: FBI Internet Crime Complaint Center, Elder Fraud Report 2024.</p>
     </div>
-    <div class="glass stat-card">
-      <div class="icon-wrap" style="background:rgba(251,191,36,0.12);">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-        </svg>
-      </div>
-      <div class="val" style="color:var(--amber);">
-        $<span class="count-up" data-target="38">0</span><span class="unit">K</span>
-      </div>
-      <div class="desc">average loss per elderly victim<br><span style="color:var(--muted);font-size:12px;">FBI IC3 report &mdash; often life savings</span></div>
-    </div>
-    <div class="glass stat-card">
-      <div class="icon-wrap" style="background:rgba(96,165,250,0.12);">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
-        </svg>
-      </div>
-      <div class="val" style="color:var(--blue);">
-        <span class="count-up" data-target="31">0</span><span class="unit">%</span>
-      </div>
-      <div class="desc">of adults get scam calls daily<br><span style="color:var(--muted);font-size:12px;">Pew Research 2025</span></div>
+    <div class="stack" style="flex: 1.2; justify-content: center; align-items: flex-start;">
+      <div id="s2-chart" style="opacity: 0; width: 100%;"></div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 3 — Growth
-════════════════════════════════════════════════════════ -->
-<div class="slide left">
-  <div class="label anim a1">And it's accelerating</div>
-  <h2 class="anim a2">Scam losses up <span style="color:var(--red);">430%</span> in five years</h2>
-  <p class="anim a3" style="font-size:15px;color:var(--muted);max-width:600px;margin-top:12px;line-height:1.7;">
-    The FTC reports $15.9 billion in losses for 2025 alone. The real number is estimated 5x higher because most victims never report it &mdash; especially the elderly.
-  </p>
+<!-- SLIDE 03 — STAKES (inline sparklines) -->
+<section class="slide" id="s3">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">03 / 18</span></div>
+  <div class="content stack gapy-md" style="justify-content: center;">
+    <p class="eye" id="s3-eye" style="opacity: 0;">Three numbers that set the field</p>
 
-  <div class="bar-chart anim a4 mt-32" id="growthBars" style="max-width:720px;">
-    <div class="bar-group" data-height="16.4">
-      <div class="bar-value">$3.0B</div>
-      <div class="bar-fill" style="background:linear-gradient(to top, rgba(248,113,113,0.1), rgba(248,113,113,0.7));"></div>
-      <div class="bar-year">2020</div>
-    </div>
-    <div class="bar-group" data-height="31.7">
-      <div class="bar-value">$5.8B</div>
-      <div class="bar-fill" style="background:linear-gradient(to top, rgba(248,113,113,0.1), rgba(248,113,113,0.7));"></div>
-      <div class="bar-year">2021</div>
-    </div>
-    <div class="bar-group" data-height="48.2">
-      <div class="bar-value">$8.8B</div>
-      <div class="bar-fill" style="background:linear-gradient(to top, rgba(248,113,113,0.12), rgba(248,113,113,0.75));"></div>
-      <div class="bar-year">2022</div>
-    </div>
-    <div class="bar-group" data-height="54.7">
-      <div class="bar-value">$10.0B</div>
-      <div class="bar-fill" style="background:linear-gradient(to top, rgba(248,113,113,0.12), rgba(248,113,113,0.75));"></div>
-      <div class="bar-year">2023</div>
-    </div>
-    <div class="bar-group" data-height="68.4">
-      <div class="bar-value">$12.5B</div>
-      <div class="bar-fill" style="background:linear-gradient(to top, rgba(248,113,113,0.15), rgba(248,113,113,0.8));"></div>
-      <div class="bar-year">2024</div>
-    </div>
-    <div class="bar-group highlight" data-height="87">
-      <div class="bar-value">$15.9B</div>
-      <div class="bar-fill" style="background:linear-gradient(to top, rgba(248,113,113,0.15), rgba(255,80,80,0.95));"></div>
-      <div class="bar-year">2025</div>
-    </div>
-  </div>
-  <p class="source">Source: FTC Consumer Sentinel Network annual reports</p>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 4 — The gap
-════════════════════════════════════════════════════════ -->
-<div class="slide left">
-  <div class="label anim a1">The gap in the market</div>
-  <h2 class="anim a2" style="font-size:48px;">Every existing solution checks <span style="color:var(--red);">the number</span>.<br>None of them listen to <span style="color:var(--green);">the caller</span>.</h2>
-
-  <div class="anim a3" style="display:flex;gap:24px;margin-top:40px;width:100%;max-width:920px;">
-    <div class="glass" style="flex:1;padding:32px 28px;">
-      <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:20px;">
-        What exists today
-      </div>
-      <div style="font-size:15px;color:var(--muted-light);line-height:1.85;">
-        <p><strong style="color:var(--text);">T-Mobile Scam Shield, RoboKiller, Truecaller, Nomorobo</strong> &mdash; they all do the same thing: check if the phone number is in a database.</p>
-        <p style="margin-top:14px;">A scammer spoofs a new number and <strong style="color:var(--red);">every single one of them lets the call through</strong>. They can't catch what they can't see.</p>
-        <p style="margin-top:14px;color:var(--muted-light);font-size:13px;">No real-time analysis. No AI. No understanding of what the caller actually says.</p>
-      </div>
-    </div>
-    <div class="glass" style="flex:1;padding:32px 28px;border-color:rgba(52,211,153,0.15);">
-      <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:20px;">
-        What's missing
-      </div>
-      <div style="font-size:15px;color:var(--muted-light);line-height:1.85;">
-        <p>A system that doesn't just check <em>who's calling</em> &mdash; but listens to <strong style="color:var(--text);">what they're saying</strong>.</p>
-        <p style="margin-top:14px;">Something that intercepts the call, asks the caller to identify themselves, and uses <strong style="color:var(--green);">AI to determine if it's a scam in real time</strong> &mdash; before the phone ever rings.</p>
-        <p style="margin-top:14px;color:var(--muted);font-size:13px;">The fundamental problem: databases are reactive. Scammers are proactive.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 5 — Guardian reveal
-════════════════════════════════════════════════════════ -->
-<div class="slide">
-  <div style="position:absolute;width:600px;height:600px;border-radius:50%;
-    background:radial-gradient(circle,rgba(52,211,153,0.07) 0%,transparent 70%);
-    filter:blur(100px);pointer-events:none;top:50%;left:50%;
-    transform:translate(-50%,-50%);z-index:0;"></div>
-
-  <div style="position:relative;z-index:1;text-align:center;">
-    <div class="anim a1" style="margin-bottom:24px;">
-      <svg width="52" height="60" viewBox="0 0 56 64" fill="none" style="display:inline-block;opacity:0.5;">
-        <path d="M28 2L4 12V32C4 46.4 14.4 59.8 28 63C41.6 59.8 52 46.4 52 32V12L28 2Z"
-          stroke="rgba(52,211,153,0.6)" stroke-width="1.5" fill="rgba(52,211,153,0.04)" stroke-linejoin="round"/>
-        <path d="M19 32L25 38L38 25" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
-      </svg>
-    </div>
-    <div class="label anim a2" style="justify-content:center;">The solution</div>
-    <h1 class="grad-green anim a3" style="font-size:104px;">Guardian</h1>
-    <p class="subtitle wide anim a4" style="text-align:center;margin:28px auto 0;">
-      AI-powered call screening that stops scams<br>before the phone ever rings.
-    </p>
-    <p class="anim a5" style="font-size:14px;color:var(--muted);margin-top:16px;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.7;">
-      Guardian sits between all incoming calls and the protected person. It screens unknown callers in real time using multi-layer AI &mdash; not just a database.
-    </p>
-    <div class="anim a6" style="margin-top:32px;display:inline-flex;align-items:center;gap:8px;
-      padding:5px 14px;border-radius:8px;background:rgba(255,255,255,0.03);
-      border:1px solid var(--border);">
-      <span style="font-size:10px;font-weight:700;letter-spacing:2.5px;
-        text-transform:uppercase;color:var(--muted);">HackTCNJ 2026</span>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 6 — How it works (4-layer flow)
-════════════════════════════════════════════════════════ -->
-<div class="slide left">
-  <div class="label anim a1">How Guardian works</div>
-  <h2 class="anim a2">Four layers of defense &mdash; calls pass through each one</h2>
-  <p class="anim a3" style="font-size:15px;color:var(--muted);max-width:700px;margin-top:12px;line-height:1.7;">
-    Calls are routed through VoIP.ms into an Asterisk PBX running a multi-layer screening pipeline. Each layer filters out more threats &mdash; only truly unknown callers ever reach the AI.
-  </p>
-
-  <div class="flow anim a4 mt-32 w-full" style="max-width:1000px;">
-    <div class="flow-node" style="border-color:rgba(52,211,153,0.25);">
-      <div class="fn-icon" style="background:rgba(52,211,153,0.1);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="M9 12l2 2 4-4" stroke-width="2"/>
-        </svg>
-      </div>
-      <div class="fn-title" style="color:var(--green);">Trusted</div>
-      <div class="fn-detail">197K verified numbers<br>Hospitals · Police · Schools</div>
-      <div class="fn-action" style="color:var(--green);">Auto-forward</div>
-    </div>
-    <div class="flow-node" style="border-color:rgba(248,113,113,0.25);">
-      <div class="fn-icon" style="background:rgba(248,113,113,0.1);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-        </svg>
-      </div>
-      <div class="fn-title" style="color:var(--red);">Blacklist</div>
-      <div class="fn-detail">64K known scam numbers<br>FTC + FCC complaint data</div>
-      <div class="fn-action" style="color:var(--red);">Instant hangup</div>
-    </div>
-    <div class="flow-node" style="border-color:rgba(96,165,250,0.25);">
-      <div class="fn-icon" style="background:rgba(96,165,250,0.1);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0110 0v4"/>
-        </svg>
-      </div>
-      <div class="fn-title" style="color:var(--blue);">Verify</div>
-      <div class="fn-detail">STIR/SHAKEN<br>Carrier-level crypto</div>
-      <div class="fn-action" style="color:var(--blue);">Catches spoofing</div>
-    </div>
-    <div class="flow-node" style="border-color:rgba(251,191,36,0.25);">
-      <div class="fn-icon" style="background:rgba(251,191,36,0.1);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2a7 7 0 00-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 002 2h4a2 2 0 002-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 00-7-7z"/>
-          <line x1="9" y1="21" x2="15" y2="21"/>
-        </svg>
-      </div>
-      <div class="fn-title" style="color:var(--amber);">AI Screen</div>
-      <div class="fn-detail">"Who's calling?"<br>Whisper + DistilBERT</div>
-      <div class="fn-action" style="color:var(--amber);">Analyzes response</div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 7 — Under the Hood (Architecture Diagram) NEW
-════════════════════════════════════════════════════════ -->
-<div class="slide">
-  <div class="label anim a1" style="justify-content:center;">Under the hood</div>
-  <h2 class="anim a2" style="text-align:center;font-size:42px;">The system behind every call</h2>
-  <p class="anim a3" style="text-align:center;font-size:14px;color:var(--muted);max-width:600px;margin-top:12px;line-height:1.7;">
-    Guardian routes all calls through VoIP.ms into an Asterisk PBX. The phone never rings until the system decides the call is safe.
-  </p>
-
-  <div class="anim a4" style="display:flex;align-items:center;justify-content:center;gap:0;margin-top:40px;width:100%;max-width:1060px;position:relative;">
-
-    <!-- Caller -->
-    <div class="arch-node">
-      <div class="arch-icon" style="border-color:rgba(248,113,113,0.3);background:rgba(248,113,113,0.06);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-        </svg>
-      </div>
-      <div class="arch-label" style="color:var(--red);">Caller</div>
-      <div class="arch-sub">Unknown number<br>calls grandma</div>
-    </div>
-
-    <!-- Arrow -->
-    <div class="arch-arrow">
-      <svg viewBox="0 0 48 20" fill="none">
-        <line x1="0" y1="10" x2="38" y2="10" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-        <path d="M34 5L42 10L34 15" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/>
-      </svg>
-    </div>
-
-    <!-- VoIP.ms -->
-    <div class="arch-node">
-      <div class="arch-icon" style="border-color:rgba(96,165,250,0.3);background:rgba(96,165,250,0.06);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-        </svg>
-      </div>
-      <div class="arch-label" style="color:var(--blue);">VoIP.ms</div>
-      <div class="arch-sub">SIP trunk<br>Forwards to Asterisk</div>
-    </div>
-
-    <!-- Arrow -->
-    <div class="arch-arrow">
-      <svg viewBox="0 0 48 20" fill="none">
-        <line x1="0" y1="10" x2="38" y2="10" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-        <path d="M34 5L42 10L34 15" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/>
-      </svg>
-    </div>
-
-    <!-- Asterisk PBX -->
-    <div class="arch-node" style="position:relative;">
-      <div class="arch-icon" style="border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.08);box-shadow:0 0 30px rgba(52,211,153,0.1);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-      </div>
-      <div class="arch-label" style="color:var(--green);">Asterisk PBX</div>
-      <div class="arch-sub">Blacklist + Whitelist +<br>Spoof detection + ML</div>
-      <!-- Glow ring -->
-      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-        width:100px;height:100px;border-radius:50%;
-        background:radial-gradient(circle,rgba(52,211,153,0.08) 0%,transparent 70%);
-        pointer-events:none;z-index:-1;"></div>
-    </div>
-
-    <!-- Three output arrows -->
-    <div style="display:flex;flex-direction:column;gap:20px;margin-left:8px;">
-      <!-- Block -->
-      <div style="display:flex;align-items:center;gap:8px;">
-        <svg viewBox="0 0 48 20" width="48" height="20" fill="none">
-          <line x1="0" y1="10" x2="38" y2="10" stroke="rgba(248,113,113,0.3)" stroke-width="1.5"/>
-          <path d="M34 5L42 10L34 15" stroke="rgba(248,113,113,0.5)" stroke-width="1.5" fill="none"/>
-        </svg>
-        <div style="padding:6px 14px;border-radius:8px;background:rgba(248,113,113,0.08);
-          border:1px solid rgba(248,113,113,0.2);font-size:11px;font-weight:800;
-          letter-spacing:1.5px;text-transform:uppercase;color:var(--red);white-space:nowrap;">
-          Block
+    <div class="row" style="align-items: flex-end; gap: 80px;" id="s3-primary">
+      <div class="stack gapy-xs" style="flex: 0 0 auto;">
+        <div class="row" style="align-items: baseline; gap: 16px;">
+          <div class="stat-xl"><span class="accent">$83K</span></div>
+          <div style="width: 100px; height: 40px;" id="s3-spark-primary"></div>
         </div>
+        <p class="h3" style="max-width: 520px; margin-top: 8px;">Average loss per senior scam victim.</p>
+        <p class="src">Mean loss per victim age 60+, FBI IC3 Elder Fraud Report 2024. The median is far lower — the mean reflects a catastrophic-case tail where 7,500+ seniors lose $100K+ each.</p>
       </div>
+    </div>
 
-      <!-- Forward -->
-      <div style="display:flex;align-items:center;gap:8px;">
-        <svg viewBox="0 0 48 20" width="48" height="20" fill="none">
-          <line x1="0" y1="10" x2="38" y2="10" stroke="rgba(52,211,153,0.3)" stroke-width="1.5"/>
-          <path d="M34 5L42 10L34 15" stroke="rgba(52,211,153,0.5)" stroke-width="1.5" fill="none"/>
-        </svg>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="padding:6px 14px;border-radius:8px;background:rgba(52,211,153,0.08);
-            border:1px solid rgba(52,211,153,0.2);font-size:11px;font-weight:800;
-            letter-spacing:1.5px;text-transform:uppercase;color:var(--green);white-space:nowrap;">
-            Forward
+    <hr class="rule" style="margin-top: 16px;">
+
+    <div class="row" style="gap: 40px; margin-top: 20px;" id="s3-support">
+      <div class="stack gapy-xs" style="flex: 1;">
+        <div class="row" style="align-items: baseline; gap: 12px;">
+          <div class="stat-md">52.8B</div>
+          <div style="width: 70px; height: 28px;" id="s3-spark-1"></div>
+        </div>
+        <p class="body-text">Robocalls placed in the US last year.</p>
+        <p class="src">YouMail Robocall Index, 2024 year-end.</p>
+      </div>
+      <div class="vrule"></div>
+      <div class="stack gapy-xs" style="flex: 1;">
+        <div class="row" style="align-items: baseline; gap: 12px;">
+          <div class="stat-md">147K</div>
+          <div style="width: 70px; height: 28px;" id="s3-spark-2"></div>
+        </div>
+        <p class="body-text">Senior fraud complaints filed with the FBI in 2024.</p>
+        <p class="src">FBI IC3 Elder Fraud Report 2024.</p>
+      </div>
+      <div class="vrule"></div>
+      <div class="stack gapy-xs" style="flex: 1;">
+        <div class="row" style="align-items: baseline; gap: 12px;">
+          <div class="stat-md">4 in 10</div>
+          <div style="width: 70px; height: 28px;" id="s3-spark-3"></div>
+        </div>
+        <p class="body-text">Older Americans who lose money to fraud.</p>
+        <p class="src">AARP 2025 Fraud Risks Survey.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 04 — SOLUTION (merged: grandmother hook + product + mockup) -->
+<section class="slide" id="s4">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">04 / 18</span></div>
+  <div class="content row" style="gap: 64px; align-items: center;">
+    <div class="stack gapy-md" style="flex: 1; max-width: 560px;">
+      <p class="eye" id="s4-eye" style="opacity: 0;">Guardian · The answer</p>
+      <h2 class="h1" id="s4-title" style="opacity: 0;">Your grandmother shouldn't need a PhD in cybersecurity to answer her phone.</h2>
+      <p class="body-lg" id="s4-body" style="opacity: 0;">Her number stays on Verizon, AT&T, or T-Mobile. One star code forwards unknown callers to the Guardian proxy. Family rings through untouched. Known scammers hear nothing. Unknown callers are screened by dual AI models before they reach her.</p>
+      <div class="stack gapy-sm" id="s4-bullets" style="opacity: 0; margin-top: 4px;">
+        <div class="row" style="gap: 12px; align-items: baseline;"><div class="tick"></div><p class="body-lg">No new device. No number change. One setup call.</p></div>
+        <div class="row" style="gap: 12px; align-items: baseline;"><div class="tick"></div><p class="body-lg">Works on any phone, any carrier, any OS.</p></div>
+        <div class="row" style="gap: 12px; align-items: baseline;"><div class="tick"></div><p class="body-lg">Family gets a live feed of every screened call.</p></div>
+      </div>
+    </div>
+    <div class="stack" style="flex: 0 0 auto; align-items: center;">
+      <div class="phone" id="s4-phone" style="opacity: 0;">
+        <div class="phone-screen">
+          <div class="phone-bar"><span class="mono">9:41</span><span class="mono">100%</span></div>
+          <div class="stack gapy-xs" style="margin-top: 4px;">
+            <p class="eye">Guardian · Today</p>
+            <p class="h3" style="font-size: 19px;">3 calls screened</p>
           </div>
-          <svg viewBox="0 0 28 20" width="28" height="20" fill="none">
-            <line x1="0" y1="10" x2="18" y2="10" stroke="rgba(52,211,153,0.3)" stroke-width="1.5"/>
-            <path d="M14 5L22 10L14 15" stroke="rgba(52,211,153,0.5)" stroke-width="1.5" fill="none"/>
-          </svg>
-          <!-- Phone icon -->
-          <div style="width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
-            border:1.5px solid rgba(52,211,153,0.35);background:rgba(52,211,153,0.08);
-            box-shadow:0 0 16px rgba(52,211,153,0.12);">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="2" width="14" height="20" rx="2"/>
-              <line x1="12" y1="18" x2="12.01" y2="18"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Screen -->
-      <div style="display:flex;align-items:center;gap:8px;">
-        <svg viewBox="0 0 48 20" width="48" height="20" fill="none">
-          <line x1="0" y1="10" x2="38" y2="10" stroke="rgba(251,191,36,0.3)" stroke-width="1.5"/>
-          <path d="M34 5L42 10L34 15" stroke="rgba(251,191,36,0.5)" stroke-width="1.5" fill="none"/>
-        </svg>
-        <div style="padding:6px 14px;border-radius:8px;background:rgba(251,191,36,0.08);
-          border:1px solid rgba(251,191,36,0.2);font-size:11px;font-weight:800;
-          letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);white-space:nowrap;">
-          AI Screen
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <p class="anim a5" style="margin-top:32px;font-size:13px;color:var(--muted);text-align:center;max-width:600px;">
-    All failures default to screening &mdash; never forwarding. A suspicious call is never accidentally let through.
-  </p>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 8 — Call Walkthrough (step-by-step) NEW
-════════════════════════════════════════════════════════ -->
-<div class="slide left" style="padding-top:52px;padding-bottom:52px;">
-  <div class="label anim a1">Walkthrough</div>
-  <h2 class="anim a2" style="font-size:40px;">What happens when <span style="color:var(--amber);">an unknown number</span> calls</h2>
-
-  <div class="walkthrough anim a3 mt-24">
-
-    <div class="wt-step">
-      <div class="wt-dot" style="background:var(--muted-light);color:#121212;">1</div>
-      <div class="wt-content">
-        <div class="wt-title">Call arrives at VoIP.ms</div>
-        <div class="wt-desc">The caller dials grandma's number. VoIP.ms receives the SIP connection and forwards it to our Asterisk PBX &mdash; grandma's phone never rings yet.</div>
-      </div>
-    </div>
-
-    <div class="wt-step">
-      <div class="wt-dot" style="background:var(--red);">2</div>
-      <div class="wt-content">
-        <div class="wt-title" style="color:var(--red);">Blacklist check &mdash; 64K known scam numbers</div>
-        <div class="wt-desc">Asterisk runs the AGI script. First check: is this number in our blacklist? Built from FTC Do Not Call complaints and FCC Unwanted Call reports. If yes &mdash;</div>
-        <div class="wt-badge" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);color:var(--red);">Instant hangup</div>
-      </div>
-    </div>
-
-    <div class="wt-step">
-      <div class="wt-dot" style="background:var(--green);">3</div>
-      <div class="wt-content">
-        <div class="wt-title" style="color:var(--green);">Whitelist check &mdash; 197K trusted institutions</div>
-        <div class="wt-desc">Hospitals, police departments, fire stations, EMS, schools, pharmacies. Sourced from 13 US government datasets (CMS, HIFLD, SSA, NCES). If the number matches &mdash;</div>
-        <div class="wt-badge" style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);color:var(--green);">Check STIR/SHAKEN [V] verification</div>
-      </div>
-    </div>
-
-    <div class="wt-step">
-      <div class="wt-dot" style="background:var(--blue);">4</div>
-      <div class="wt-content">
-        <div class="wt-title" style="color:var(--blue);">Spoof detection &mdash; carrier cryptographic verification</div>
-        <div class="wt-desc">If the number claims to be a trusted institution, we verify the carrier signed it with STIR/SHAKEN A-level attestation. VoIP.ms prepends <code style="background:rgba(96,165,250,0.15);padding:1px 6px;border-radius:4px;font-size:12px;">[V]</code> to verified calls. No <code style="background:rgba(248,113,113,0.15);padding:1px 6px;border-radius:4px;font-size:12px;">[V]</code>? Possible spoof &mdash; route to AI screening.</div>
-      </div>
-    </div>
-
-    <div class="wt-step">
-      <div class="wt-dot" style="background:var(--amber);">5</div>
-      <div class="wt-content">
-        <div class="wt-title" style="color:var(--amber);">AI screening &mdash; "Who's calling and why?"</div>
-        <div class="wt-desc">For truly unknown numbers: the IVR answers, asks the caller to identify themselves, records their response. Whisper transcribes it, DistilBERT classifies it as safe or scam &mdash; 2ms inference, zero cloud cost.</div>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <div class="wt-badge" style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);color:var(--green);">Safe &rarr; Forward</div>
-          <div class="wt-badge" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);color:var(--red);">Scam &rarr; Block</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="wt-step">
-      <div class="wt-dot" style="background:var(--green);">6</div>
-      <div class="wt-content">
-        <div class="wt-title" style="color:var(--green);">Phone rings &mdash; only if it's safe</div>
-        <div class="wt-desc">The call is forwarded to grandma's phone. She picks up. She never knew anything happened. The entire process took seconds.</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 9 — 90% Never Reach AI (donut)
-════════════════════════════════════════════════════════ -->
-<div class="slide">
-  <div style="position:absolute;width:500px;height:500px;border-radius:50%;
-    background:radial-gradient(circle,rgba(52,211,153,0.07) 0%,transparent 70%);
-    filter:blur(100px);pointer-events:none;z-index:0;"></div>
-
-  <div style="position:relative;z-index:1;display:flex;align-items:center;gap:72px;width:100%;max-width:1060px;">
-
-    <div class="donut-wrap" id="funnelDonut">
-      <svg viewBox="0 0 340 340" style="transform:rotate(-90deg);">
-        <defs>
-          <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glow-amber" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <circle class="donut-glow" cx="170" cy="170" r="130" pathLength="100"
-          stroke="rgba(52,211,153,0.5)" stroke-dasharray="57 43" stroke-dashoffset="0" filter="url(#glow-green)"/>
-        <circle class="donut-glow" cx="170" cy="170" r="130" pathLength="100"
-          stroke="rgba(248,113,113,0.5)" stroke-dasharray="28 72" stroke-dashoffset="-58.5" filter="url(#glow-red)"/>
-        <circle class="donut-glow" cx="170" cy="170" r="130" pathLength="100"
-          stroke="rgba(251,191,36,0.5)" stroke-dasharray="9.5 90.5" stroke-dashoffset="-88" filter="url(#glow-amber)"/>
-        <circle class="donut-segment" cx="170" cy="170" r="130" pathLength="100"
-          stroke="#34d399" stroke-dasharray="57 43" stroke-dashoffset="100" data-target="0"/>
-        <circle class="donut-segment" cx="170" cy="170" r="130" pathLength="100"
-          stroke="#f87171" stroke-dasharray="28 72" stroke-dashoffset="100" data-target="-58.5"/>
-        <circle class="donut-segment" cx="170" cy="170" r="130" pathLength="100"
-          stroke="#fbbf24" stroke-dasharray="9.5 90.5" stroke-dashoffset="100" data-target="-88"/>
-      </svg>
-      <div class="donut-center">
-        <div style="font-size:54px;font-weight:900;letter-spacing:-3px;color:var(--amber);
-          text-shadow:0 0 40px rgba(251,191,36,0.35);">10%</div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;
-          text-transform:uppercase;color:var(--muted);margin-top:4px;">needs AI</div>
-      </div>
-    </div>
-
-    <div style="flex:1;">
-      <div class="label anim a1">Cost architecture</div>
-      <h2 class="anim a2" style="font-size:42px;">90% of incoming calls<br>never hit the model</h2>
-
-      <div class="anim a3" style="display:flex;flex-direction:column;gap:16px;margin-top:32px;">
-        <div style="display:flex;align-items:center;gap:14px;">
-          <div style="width:12px;height:12px;border-radius:50%;background:var(--green);flex-shrink:0;
-            box-shadow:0 0 10px rgba(52,211,153,0.6);"></div>
-          <div style="font-size:14px;">
-            <span style="color:var(--text);font-weight:600;">197K trusted numbers</span>
-            <span style="color:var(--muted);"> — auto-forwarded, 60% of calls</span>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:14px;">
-          <div style="width:12px;height:12px;border-radius:50%;background:var(--red);flex-shrink:0;
-            box-shadow:0 0 10px rgba(248,113,113,0.6);"></div>
-          <div style="font-size:14px;">
-            <span style="color:var(--text);font-weight:600;">64K blacklisted</span>
-            <span style="color:var(--muted);"> — instant hangup, ~30% of calls</span>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:14px;">
-          <div style="width:12px;height:12px;border-radius:50%;background:var(--amber);flex-shrink:0;
-            box-shadow:0 0 10px rgba(251,191,36,0.6);"></div>
-          <div style="font-size:14px;">
-            <span style="color:var(--text);font-weight:600;">~10% unknowns</span>
-            <span style="color:var(--muted);"> — hit the AI screening pipeline</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="anim a4" style="margin-top:28px;padding:18px 22px;border-radius:12px;
-        background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.1);">
-        <p style="font-size:13px;color:var(--green);font-weight:700;letter-spacing:0.3px;">
-          Zero compute cost. Zero latency. Zero risk.
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 10 — The App (phone mockups) NEW
-════════════════════════════════════════════════════════ -->
-<div class="slide">
-  <div class="label anim a1" style="justify-content:center;">The app</div>
-  <h2 class="anim a2" style="text-align:center;font-size:40px;">Designed for people who don't use apps</h2>
-  <p class="anim a3" style="text-align:center;font-size:14px;color:var(--muted);margin-top:8px;max-width:520px;">
-    Member view (grandma) shows one thing: "you're protected." Admin view (family lead) shows everything else.
-  </p>
-
-  <div class="anim a4" style="display:flex;align-items:flex-start;gap:48px;margin-top:36px;">
-
-    <!-- Member View (Grandma) -->
-    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
-      <div style="font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
-        color:var(--muted);padding:4px 14px;border-radius:14px;
-        background:rgba(255,255,255,0.03);border:1px solid var(--border);">Member View</div>
-      <div class="phone-frame">
-        <div class="phone-notch"></div>
-        <div class="phone-status">
-          <span>9:41</span>
-          <span style="display:flex;gap:4px;align-items:center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#888"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#888"><rect x="2" y="6" width="20" height="12" rx="2"/><rect x="22" y="9" width="2" height="6" rx="1"/><rect x="4" y="8" width="12" height="8" rx="1" fill="#34d399"/></svg>
-          </span>
-        </div>
-        <div class="phone-body" style="align-items:center;justify-content:center;
-          background:radial-gradient(ellipse at 50% 40%, rgba(34,197,94,0.06) 0%, transparent 70%);">
-          <!-- Shield -->
-          <div style="width:140px;height:140px;border-radius:50%;
-            border:3px solid rgba(34,197,94,0.25);
-            display:flex;align-items:center;justify-content:center;
-            background:radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%);
-            box-shadow:0 0 60px rgba(34,197,94,0.1), 0 0 120px rgba(34,197,94,0.05);
-            position:relative;">
-            <!-- Outer ring -->
-            <div style="position:absolute;width:152px;height:152px;border-radius:50%;
-              border:1px solid rgba(34,197,94,0.08);"></div>
-            <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="M9 12l2 2 4-4" stroke-width="2"/>
-            </svg>
-          </div>
-          <div style="margin-top:20px;font-size:13px;font-weight:800;letter-spacing:4px;
-            text-transform:uppercase;color:rgba(34,197,94,0.8);">Protected</div>
-          <div style="margin-top:6px;font-size:10px;color:#444;">Guardian is active</div>
-
-          <!-- Stats row -->
-          <div style="display:flex;gap:16px;margin-top:28px;">
-            <div style="text-align:center;">
-              <div style="font-size:22px;font-weight:800;color:var(--red);">3</div>
-              <div style="font-size:8px;color:#555;text-transform:uppercase;letter-spacing:1px;">Blocked</div>
+          <div class="stack" style="margin-top: 2px;">
+            <div class="phone-call">
+              <p class="mono status-ok">✓ FORWARDED</p>
+              <p class="body-text" style="font-size: 12px; color: var(--ink);">Margaret Chen</p>
+              <p class="caption">Daughter · 2:14 pm</p>
             </div>
-            <div style="width:1px;background:rgba(255,255,255,0.06);"></div>
-            <div style="text-align:center;">
-              <div style="font-size:22px;font-weight:800;color:var(--green);">12</div>
-              <div style="font-size:8px;color:#555;text-transform:uppercase;letter-spacing:1px;">Forwarded</div>
+            <div class="phone-call">
+              <p class="mono status-bad">✕ BLOCKED</p>
+              <p class="body-text" style="font-size: 12px; color: var(--ink);">Unknown · (347) 555‑0183</p>
+              <p class="caption">Scam · AI voice detected · 11:02 am</p>
+            </div>
+            <div class="phone-call">
+              <p class="mono status-ok">✓ FORWARDED</p>
+              <p class="body-text" style="font-size: 12px; color: var(--ink);">CVS Pharmacy</p>
+              <p class="caption">Prescription ready · 9:48 am</p>
             </div>
           </div>
         </div>
-        <div class="phone-nav">
-          <div class="phone-nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-            Home
-          </div>
-          <div class="phone-nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
-            Calls
-          </div>
-          <div class="phone-nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-            Settings
-          </div>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Grandma sees this</div>
-    </div>
-
-    <!-- Admin View (Family Lead) — Call Log -->
-    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
-      <div style="font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
-        color:var(--green);padding:4px 14px;border-radius:14px;
-        background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.15);">Admin View</div>
-      <div class="phone-frame">
-        <div class="phone-notch"></div>
-        <div class="phone-status">
-          <span>9:41</span>
-          <span style="display:flex;gap:4px;align-items:center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#888"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#888"><rect x="2" y="6" width="20" height="12" rx="2"/><rect x="22" y="9" width="2" height="6" rx="1"/><rect x="4" y="8" width="12" height="8" rx="1" fill="#34d399"/></svg>
-          </span>
-        </div>
-        <div class="phone-body" style="padding:12px 16px;gap:10px;">
-          <!-- Header -->
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:18px;font-weight:800;letter-spacing:-0.5px;">Call Log</div>
-            <div style="display:flex;gap:4px;">
-              <div style="padding:3px 8px;border-radius:6px;font-size:8px;font-weight:700;
-                background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.15);">All</div>
-              <div style="padding:3px 8px;border-radius:6px;font-size:8px;font-weight:700;
-                color:#555;">Blocked</div>
-              <div style="padding:3px 8px;border-radius:6px;font-size:8px;font-weight:700;
-                color:#555;">Safe</div>
-            </div>
-          </div>
-
-          <!-- Call entries -->
-          <div style="display:flex;flex-direction:column;gap:2px;flex:1;overflow:hidden;">
-            <!-- Blocked call -->
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;
-              background:rgba(248,113,113,0.04);border:1px solid rgba(248,113,113,0.08);">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(248,113,113,0.1);
-                display:flex;align-items:center;justify-content:center;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-              </div>
-              <div style="flex:1;">
-                <div style="font-size:11px;font-weight:700;">+1 (800) 555-0199</div>
-                <div style="font-size:9px;color:var(--red);">Blocked &middot; Blacklisted</div>
-              </div>
-              <div style="font-size:9px;color:#444;">2m ago</div>
-            </div>
-
-            <!-- Forwarded call -->
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;
-              background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.08);">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(52,211,153,0.1);
-                display:flex;align-items:center;justify-content:center;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-              </div>
-              <div style="flex:1;">
-                <div style="font-size:11px;font-weight:700;">Trenton PD</div>
-                <div style="font-size:9px;color:var(--green);">Forwarded &middot; Trusted [V]</div>
-              </div>
-              <div style="font-size:9px;color:#444;">18m ago</div>
-            </div>
-
-            <!-- Screened call -->
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;
-              background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.08);">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(251,191,36,0.1);
-                display:flex;align-items:center;justify-content:center;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M12 2a7 7 0 00-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 002 2h4a2 2 0 002-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 00-7-7z"/></svg>
-              </div>
-              <div style="flex:1;">
-                <div style="font-size:11px;font-weight:700;">+1 (609) 555-0342</div>
-                <div style="font-size:9px;color:var(--amber);">Screened &middot; AI Safe (94%)</div>
-              </div>
-              <div style="font-size:9px;color:#444;">1h ago</div>
-            </div>
-
-            <!-- Another forwarded -->
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;
-              background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.08);">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(52,211,153,0.1);
-                display:flex;align-items:center;justify-content:center;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-              </div>
-              <div style="flex:1;">
-                <div style="font-size:11px;font-weight:700;">CVS Pharmacy</div>
-                <div style="font-size:9px;color:var(--green);">Forwarded &middot; Trusted [V]</div>
-              </div>
-              <div style="font-size:9px;color:#444;">3h ago</div>
-            </div>
-
-            <!-- Blocked -->
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;
-              background:rgba(248,113,113,0.04);border:1px solid rgba(248,113,113,0.08);">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(248,113,113,0.1);
-                display:flex;align-items:center;justify-content:center;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-              </div>
-              <div style="flex:1;">
-                <div style="font-size:11px;font-weight:700;">+1 (213) 555-0891</div>
-                <div style="font-size:9px;color:var(--red);">Blocked &middot; AI Scam (98%)</div>
-              </div>
-              <div style="font-size:9px;color:#444;">5h ago</div>
-            </div>
-          </div>
-        </div>
-        <div class="phone-nav">
-          <div class="phone-nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-            Home
-          </div>
-          <div class="phone-nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
-            Calls
-          </div>
-          <div class="phone-nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            Family
-          </div>
-          <div class="phone-nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-            Settings
-          </div>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Family lead manages this</div>
-    </div>
-
-    <!-- Annotation column -->
-    <div class="anim a5" style="display:flex;flex-direction:column;gap:20px;max-width:260px;align-self:center;">
-      <div style="padding:18px 20px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">
-        <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin-bottom:8px;">VPN-style design</div>
-        <div style="font-size:13px;color:var(--muted-light);line-height:1.65;">One glance. One concept. If grandma opens the app, she immediately sees "I'm protected" without reading anything.</div>
-      </div>
-      <div style="padding:18px 20px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">
-        <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;">Role-based views</div>
-        <div style="font-size:13px;color:var(--muted-light);line-height:1.65;">The admin (family lead) sets everything up and manages the system. Grandma never sees settings, configs, or complexity.</div>
-      </div>
-      <div style="padding:18px 20px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">
-        <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);margin-bottom:8px;">Real-time data</div>
-        <div style="font-size:13px;color:var(--muted-light);line-height:1.65;">Call log updates every 5 seconds. Every blocked scam and forwarded call shows up with verdict, confidence score, and transcript.</div>
       </div>
     </div>
-
   </div>
+</section>
+
+<!-- SLIDE 05 — TIER 1 -->
+<section class="slide" id="s5">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">05 / 18</span></div>
+  <div class="content row" style="gap: 64px; align-items: center;">
+    <div class="stack gapy-md" style="flex: 1; max-width: 520px;">
+      <p class="eye" id="s5-eye" style="opacity: 0;">Tier 1 · Instant block · 0 ms audio</p>
+      <h2 class="h1" id="s5-title" style="opacity: 0;">Known scammers never reach her phone.</h2>
+      <p class="body-lg" id="s5-body" style="opacity: 0;">Every inbound call's number is checked against the Apple scam database before the first ring. If it matches, the call is dropped at our proxy. No ringtone. No decision for grandma to make. The caller hears dead air.</p>
+    </div>
+    <div class="stack" style="flex: 1; max-width: 500px; opacity: 0;" id="s5-diagram">
+      <div class="card stack gapy-sm">
+        <p class="mono">CALL INBOUND</p>
+        <p style="font-family: var(--mono); font-size: 18px; font-weight: 500; letter-spacing: 0.04em;">+1 (347) 555‑0183</p>
+        <hr class="rule" style="margin: 8px 0;">
+        <p class="mono">APPLE SCAM DB · TIER 1 LOOKUP</p>
+        <p style="color: var(--bad); font-family: var(--mono); font-size: 16px; font-weight: 500;">MATCH → BLOCK</p>
+        <hr class="rule" style="margin: 8px 0;">
+        <div class="row" style="justify-content: space-between;"><span class="mono">Latency</span><span class="mono-num">12 ms</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="mono">Audio processed</span><span class="mono-num">0 s</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="mono">Grandma hears</span><span class="mono-num">nothing</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 06 — TIER 2 -->
+<section class="slide" id="s6">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">06 / 18</span></div>
+  <div class="content row" style="gap: 64px; align-items: center;">
+    <div class="stack gapy-md" style="flex: 1; max-width: 520px;">
+      <p class="eye" id="s6-eye" style="opacity: 0;">Tier 2 · Trusted pass-through · &lt;50 ms</p>
+      <h2 class="h1" id="s6-title" style="opacity: 0;">Family never hears an AI voice.</h2>
+      <p class="body-lg" id="s6-body" style="opacity: 0;">Personal contacts pass through instantly. Institutions (hospitals, pharmacies, police) require STIR/SHAKEN attestation before passing — otherwise they get routed to screening. No IVR. No "press 1." No delay.</p>
+    </div>
+    <div class="stack" style="flex: 1; max-width: 500px; opacity: 0;" id="s6-diagram">
+      <div class="card stack gapy-sm">
+        <p class="mono">CALL INBOUND</p>
+        <p style="font-family: var(--mono); font-size: 17px; font-weight: 500; letter-spacing: 0.04em;">+1 (609) 555‑0147 · "Margaret Chen"</p>
+        <hr class="rule" style="margin: 8px 0;">
+        <p class="mono">TRUSTED CALLERS DB · CATEGORY CHECK</p>
+        <div class="row" style="justify-content: space-between;"><span class="mono">Category</span><span class="mono-num">family</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="mono">STIR/SHAKEN</span><span class="mono-num">[V] verified</span></div>
+        <hr class="rule" style="margin: 8px 0;">
+        <p style="color: var(--ok); font-family: var(--mono); font-size: 16px; font-weight: 500;">PASS → FORWARD</p>
+        <div class="row" style="justify-content: space-between;"><span class="mono">Caller ID shown</span><span class="mono-num">real number</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 07 — TIER 3 -->
+<section class="slide" id="s7">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">07 / 18</span></div>
+  <div class="content stack gapy-md" style="justify-content: center;">
+    <div class="row" style="justify-content: space-between; align-items: baseline;">
+      <p class="eye" id="s7-eye" style="opacity: 0;">Tier 3 · Unknown caller · Dual-model AI screening</p>
+      <p class="mono" id="s7-time" style="opacity: 0;">Live · 2026‑04‑16 14:02:37</p>
+    </div>
+    <h2 class="h2" id="s7-title" style="opacity: 0; max-width: 840px;">Unknown numbers are interviewed, transcribed, and evaluated — by two models running in parallel.</h2>
+
+    <div class="row" style="gap: 0; border: 1px solid var(--rule); margin-top: 12px; opacity: 0;" id="s7-panel">
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px; border-right: 1px solid var(--rule);">
+        <p class="mono">CAPTURE</p>
+        <p class="body-text" style="color: var(--ink); font-weight: 500;">"Hi, who's calling?"</p>
+        <div style="height: 30px; display: flex; align-items: center; gap: 2px;" id="s7-wave"></div>
+        <div class="row" style="justify-content: space-between;"><span class="mono">Duration</span><span class="mono-num">5.2 s</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="mono">Sample rate</span><span class="mono-num">16 kHz mono</span></div>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px; border-right: 1px solid var(--rule);">
+        <p class="mono">Wav2Vec2 · Voice authenticity</p>
+        <p class="body-text" style="color: var(--ink); font-weight: 500;">Is this a real human?</p>
+        <div class="stack gapy-xs" style="margin-top: 4px;">
+          <div class="row" style="justify-content: space-between;"><span class="mono">Verdict</span><span class="mono-num" style="color: var(--bad);">AI GENERATED</span></div>
+          <div class="row" style="justify-content: space-between;"><span class="mono">Confidence</span><span class="mono-num">0.94</span></div>
+          <div class="row" style="justify-content: space-between;"><span class="mono">Inference</span><span class="mono-num">860 ms</span></div>
+        </div>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px;">
+        <p class="mono">DistilBERT · Scam text</p>
+        <p class="body-text" style="color: var(--ink); font-weight: 500;">Is the transcript a scam pattern?</p>
+        <div class="stack gapy-xs" style="margin-top: 4px;">
+          <div class="row" style="justify-content: space-between;"><span class="mono">Transcript</span><span class="mono-num">"IRS final notice"</span></div>
+          <div class="row" style="justify-content: space-between;"><span class="mono">Verdict</span><span class="mono-num" style="color: var(--bad);">SCAM</span></div>
+          <div class="row" style="justify-content: space-between;"><span class="mono">Confidence</span><span class="mono-num">0.91</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="justify-content: space-between; align-items: baseline; margin-top: 16px; opacity: 0;" id="s7-verdict">
+      <p class="mono">PIPELINE VERDICT</p>
+      <p style="color: var(--bad); font-family: var(--mono); font-size: 24px; font-weight: 500; letter-spacing: 0.04em;">BLOCK · 1.8 s TOTAL</p>
+    </div>
+    <p class="src" style="margin-top: 4px; opacity: 0;" id="s7-src">Fail-open: if either model times out, the call is forwarded. Guardian will never block a legitimate caller due to infrastructure failure.</p>
+  </div>
+</section>
+
+<!-- SLIDE 08 — TRACTION -->
+<section class="slide" id="s8">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">08 / 18</span></div>
+  <div class="content stack gapy-md" style="justify-content: center;">
+    <p class="eye" id="s8-eye" style="opacity: 0;">Traction · Pre-launch beta · April 2026</p>
+    <h2 class="h1" id="s8-title" style="opacity: 0; max-width: 860px;">End-to-end prototype running today. Targeting 50 families in paid beta.</h2>
+
+    <div class="row" style="gap: 0; margin-top: 16px; opacity: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);" id="s8-grid">
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px; border-right: 1px solid var(--rule);">
+        <p class="stat-md">4</p>
+        <p class="body-text" style="max-width: 220px;">Production services running end-to-end (Asterisk, API, Whisper, ML).</p>
+        <p class="mono">SHIPPED</p>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px; border-right: 1px solid var(--rule);">
+        <p class="stat-md">2</p>
+        <p class="body-text" style="max-width: 220px;">Trained AI models — DistilBERT scam text + Wav2Vec2 voice authenticity.</p>
+        <p class="mono">TRAINED</p>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px; border-right: 1px solid var(--rule);">
+        <p class="stat-md">3</p>
+        <p class="body-text" style="max-width: 220px;">Screening tiers live in the call pipeline — block, trust, interview.</p>
+        <p class="mono">VALIDATED</p>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px;">
+        <p class="stat-md"><span class="accent">50</span></p>
+        <p class="body-text" style="max-width: 220px;">Beta families targeted for Q3 2026. Waitlist opens with the raise.</p>
+        <p class="mono">NEXT</p>
+      </div>
+    </div>
+
+    <div class="stack gapy-xs" style="margin-top: 12px; opacity: 0;" id="s8-note">
+      <p class="body-text">Zero revenue today. Zero paid users. Working system you can call right now — the phone rings in a real IVR on a real DID, and a real caller hears a real verdict from a real model.</p>
+      <p class="src">Architecture and training detail: github.com/suroninc/guardian</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 09 — MARKET (eldercare safety + fraud driver) -->
+<section class="slide" id="s9">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">09 / 18</span></div>
+  <div class="content stack gapy-md" style="justify-content: center;">
+    <p class="eye" id="s9-eye" style="opacity: 0;">Market · US medical-alert + senior-safety subscriptions</p>
+    <div class="row" style="align-items: flex-end; gap: 56px; opacity: 0;" id="s9-top">
+      <h2 class="h1" style="max-width: 580px;">A <span class="accent">$2.6B → $7.8B</span> market, compounding at 11.6% a year.</h2>
+      <p class="body-lg" style="max-width: 400px; padding-bottom: 8px;">Guardian sits at the intersection of two curves — rising consumer spend on protecting aging parents, and the exponential growth of AI-enabled phone fraud. Medical-alert incumbents are hardware-centric. Nobody has shipped the software-only screening layer.</p>
+    </div>
+    <div id="s9-chart" style="margin-top: 12px; opacity: 0;"></div>
+    <p class="src" style="opacity: 0;" id="s9-src">Source: Towards Healthcare, US Medical Alert Systems Market 2024–2034. Growth modeled as compound: $2.6B × (1.116)^t. Fraud driver: $4.8B/yr senior losses, FBI IC3 2024.</p>
+  </div>
+</section>
+
+<!-- SLIDE 10 — GO-TO-MARKET -->
+<section class="slide" id="s10">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">10 / 18</span></div>
+  <div class="content stack gapy-md" style="justify-content: center;">
+    <p class="eye" id="s10-eye" style="opacity: 0;">Go-to-market · The adult-child channel</p>
+    <h2 class="h1" id="s10-title" style="opacity: 0; max-width: 880px;">One buyer. Three channels. Sticky retention by design.</h2>
+    <p class="body-lg" id="s10-body" style="opacity: 0; max-width: 820px;">The buyer is never the user. The adult child — 35 to 55, employed, with an aging parent — sets it up, gifts the number, and pays the bill. Cancelling means telling Mom she's on her own. That's the retention moat.</p>
+
+    <div class="row" id="s10-grid" style="gap: 0; margin-top: 16px; opacity: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px; border-right: 1px solid var(--rule);">
+        <p class="mono">01 · DIRECT</p>
+        <p class="h3">Paid acquisition</p>
+        <p class="body-text" style="max-width: 260px;">Meta / Google ads targeting adults 35–55 with aging-parent signals. Creative anchor: "Your mom answered a scam call. Here's what happens next."</p>
+        <div class="stack gapy-xs" style="margin-top: 8px;">
+          <div class="row" style="justify-content: space-between;"><span class="mono">Est. CAC</span><span class="mono-num">$150–240</span></div>
+          <div class="row" style="justify-content: space-between;"><span class="mono">Ramp</span><span class="mono-num">Month 1–6</span></div>
+        </div>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px; border-right: 1px solid var(--rule);">
+        <p class="mono">02 · PARTNER</p>
+        <p class="h3">Eldercare channel</p>
+        <p class="body-text" style="max-width: 260px;">Area Agencies on Aging, AARP newsletters, senior-care coordinators, memory-care facilities. Long cycle, lower CAC after first partners, high trust.</p>
+        <div class="stack gapy-xs" style="margin-top: 8px;">
+          <div class="row" style="justify-content: space-between;"><span class="mono">Est. CAC</span><span class="mono-num">$60–120</span></div>
+          <div class="row" style="justify-content: space-between;"><span class="mono">Ramp</span><span class="mono-num">Month 6+</span></div>
+        </div>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px;">
+        <p class="mono">03 · ORGANIC</p>
+        <p class="h3">Earned media</p>
+        <p class="body-text" style="max-width: 260px;">Scam-epidemic coverage is everywhere — 60 Minutes, local news, AARP, Kim Komando. Guardian is the first quotable answer. PR-first, not ad-first.</p>
+        <div class="stack gapy-xs" style="margin-top: 8px;">
+          <div class="row" style="justify-content: space-between;"><span class="mono">Est. CAC</span><span class="mono-num">Variable</span></div>
+          <div class="row" style="justify-content: space-between;"><span class="mono">Ramp</span><span class="mono-num">Month 12+</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="src" id="s10-src" style="opacity: 0; margin-top: 8px;">CAC ranges benchmarked against consumer-eldercare analogues (GrandPad, Bark, Life Alert). Blended target CAC ~$150 at steady state. Year-1 CAC runs closer to $220 because the mix is direct-heavy. Channel order is sequenced — direct funds partner, partner earns organic.</p>
+  </div>
+</section>
+
+<!-- SLIDE 11 — REVENUE RAMP -->
+<section class="slide" id="s11">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">11 / 18</span></div>
+  <div class="content row" style="gap: 56px; align-items: stretch;">
+    <div class="stack gapy-md" style="flex: 1; justify-content: center; max-width: 440px;">
+      <p class="eye" id="s11-eye" style="opacity: 0;">Revenue · Month 0 to Month 36</p>
+      <h2 class="h1" id="s11-title" style="opacity: 0;">Path to <span class="accent">$6.2M ARR</span> by Month 36.</h2>
+      <p class="body-lg" id="s11-body" style="opacity: 0;">Consumer subscription priced per protected number. Positioned in the eldercare-safety band — above commodity call-blockers, well under Life Alert and GrandPad.</p>
+      <div class="stack gapy-xs" id="s11-assumptions" style="opacity: 0; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--rule);">
+        <p class="mono">ASSUMPTIONS</p>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">TAM (US seniors 65+)</span><span class="mono-num">61.2M</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Paid subscribers, Mo 36</span><span class="mono-num">~26,000</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Market penetration, Mo 36</span><span class="mono-num">0.042%</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">ARPU (monthly)</span><span class="mono-num">$19.99</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Family plan (up to 3)</span><span class="mono-num">$29.99</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Acquisition</span><span class="mono-num">Adult-child channel</span></div>
+      </div>
+    </div>
+    <div class="stack" style="flex: 1.4; justify-content: center; align-items: flex-start;">
+      <div id="s11-chart" style="opacity: 0; width: 100%;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 12 — UNIT ECONOMICS -->
+<section class="slide" id="s12">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">12 / 18</span></div>
+  <div class="content stack gapy-md" style="justify-content: center;">
+    <p class="eye" id="s12-eye" style="opacity: 0;">Unit economics · Per protected number</p>
+    <h2 class="h1" id="s12-title" style="opacity: 0; max-width: 880px;">An <span class="accent">82% gross margin</span> business. Nine-month CAC payback.</h2>
+
+    <div class="row" id="s12-grid" style="gap: 0; margin-top: 16px; opacity: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px; border-right: 1px solid var(--rule);">
+        <p class="stat-md"><span class="accent">82%</span></p>
+        <p class="body-text" style="max-width: 220px;">Gross margin. Software-royalty economics — COGS dominated by VoIP carrier fees and payment processing, not AI compute.</p>
+        <p class="mono">MARGIN</p>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px; border-right: 1px solid var(--rule);">
+        <p class="stat-md">$19.99</p>
+        <p class="body-text" style="max-width: 220px;">Monthly ARPU. Anchored in the eldercare-safety band, not commodity call-blockers.</p>
+        <p class="mono">ARPU</p>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px; border-right: 1px solid var(--rule);">
+        <p class="stat-md">$492</p>
+        <p class="body-text" style="max-width: 220px;">Net LTV over 30-month steady-state retention. Annual plans and family embedding reduce eldercare churn.</p>
+        <p class="mono">LTV</p>
+      </div>
+      <div class="stack gapy-sm" style="flex: 1; padding: 22px 28px;">
+        <p class="stat-md">9 mo</p>
+        <p class="body-text" style="max-width: 220px;">CAC payback at $150 blended target CAC. LTV:CAC ≥ 3.3 : 1 at steady state.</p>
+        <p class="mono">PAYBACK</p>
+      </div>
+    </div>
+
+    <div class="row" id="s12-econ-breakdown" style="opacity: 0; gap: 48px; margin-top: 18px;">
+      <div class="stack gapy-xs" style="flex: 1;">
+        <p class="mono">COST STRUCTURE · PER USER / MO</p>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">VoIP.ms DID + SIP trunk</span><span class="mono-num">$2.00</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Payment processing (Stripe)</span><span class="mono-num">$0.88</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Customer support (allocated)</span><span class="mono-num">$0.62</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">ML + Whisper inference</span><span class="mono-num">$0.01</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Storage + observability</span><span class="mono-num">$0.05</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text"><strong>Total COGS</strong></span><span class="mono-num"><strong>~$3.56</strong></span></div>
+      </div>
+      <div class="vrule"></div>
+      <div class="stack gapy-xs" style="flex: 1;">
+        <p class="mono">LIFETIME · PER USER</p>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Target retention (steady state)</span><span class="mono-num">30 months</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Gross LTV</span><span class="mono-num">$600</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Net LTV (after COGS)</span><span class="mono-num">$492</span></div>
+        <div class="row" style="justify-content: space-between;"><span class="body-text">Target LTV:CAC ratio</span><span class="mono-num">3.3 : 1</span></div>
+      </div>
+    </div>
+
+    <p class="src" id="s12-src" style="opacity: 0; margin-top: 6px;">Year-1 unit economics will be weaker — retention closer to 18 months and direct-heavy CAC near $220, yielding ~2:1 LTV:CAC. Steady-state numbers above reflect year-2+ as partner and organic channels mature. Compute cost from Guardian production-cost model: $0.00018/call × ~28 calls/person/mo. COGS dominated by carrier infrastructure and payment processing, not AI inference.</p>
+  </div>
+</section>
+
+<!-- SLIDE 13 — COMPETITIVE MATRIX (Apple included) -->
+<section class="slide" id="s13">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">13 / 18</span></div>
+  <div class="content stack gapy-sm" style="justify-content: flex-start;">
+    <p class="eye" id="s13-eye" style="opacity: 0;">Competitive positioning · Eldercare safety landscape</p>
+    <h2 class="h2" id="s13-title" style="opacity: 0; max-width: 960px;">Hardware-tied, iPhone-only, or single-prompt. Only Guardian is cross-platform, family-visible, and deepfake-aware.</h2>
+    <div id="s13-matrix" style="margin-top: 8px; align-self: center; opacity: 0;"></div>
+    <p class="src" id="s13-note" style="opacity: 0; align-self: center; max-width: 960px; text-align: center; margin-top: 4px;">Apple shipped iOS 26 Call Screening in Sept 2025 — on-device AI that prompts unknown callers once. But it's off by default, iPhone-only, has no family dashboard, no voice-authenticity check, and no follow-up dialogue. Life Alert and GrandPad solve adjacent problems with dedicated hardware. Hiya / RoboKiller / Nomorobo live in the commodity $3–15/mo band. Guardian is the only active, software-only, family-visible, dual-model-AI screener that works on any phone on any carrier.</p>
+  </div>
+</section>
+
+<!-- SLIDE 14 — MOAT -->
+<section class="slide" id="s14">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">14 / 18</span></div>
+  <div class="content stack gapy-md" style="justify-content: center;">
+    <p class="eye" id="s14-eye" style="opacity: 0;">Defensibility · Why nobody catches up</p>
+    <h2 class="h1" id="s14-title" style="opacity: 0; max-width: 880px;">Four layers of moat that <span class="accent">compound</span> over time.</h2>
+
+    <div class="stack" id="s14-grid" style="margin-top: 18px; opacity: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+      <div class="row" style="border-bottom: 1px solid var(--rule);">
+        <div class="stack gapy-xs" style="flex: 0 0 120px; padding: 18px 24px; border-right: 1px solid var(--rule); justify-content: center;">
+          <p class="mono">01</p>
+          <p class="h3" style="font-size: 18px;">Phone-agnostic + family-first</p>
+        </div>
+        <div class="stack gapy-xs" style="flex: 1; padding: 18px 28px;">
+          <p class="body-lg"><strong>Apple's iOS 26 screening is iPhone-only and has no family dashboard.</strong> ~40% of US seniors still use Android. Guardian runs at the carrier layer, works on any phone, and ships a dashboard for the adult child — who is the actual buyer. Apple has no adult-child product. That's the durable wedge.</p>
+        </div>
+      </div>
+      <div class="row" style="border-bottom: 1px solid var(--rule);">
+        <div class="stack gapy-xs" style="flex: 0 0 120px; padding: 18px 24px; border-right: 1px solid var(--rule); justify-content: center;">
+          <p class="mono">02</p>
+          <p class="h3" style="font-size: 18px;">Dual-model deepfake detection</p>
+        </div>
+        <div class="stack gapy-xs" style="flex: 1; padding: 18px 28px;">
+          <p class="body-lg"><strong>Apple blocks robocalls. Guardian stops the grandson-in-jail voice-clone.</strong> Wav2Vec2 voice-authenticity + DistilBERT text-scam classification run in parallel on every unknown caller. Apple ships neither. As AI voice-cloning scams explode, deepfake detection is the capability regulators and families will start asking for — and nobody else sells it.</p>
+        </div>
+      </div>
+      <div class="row" style="border-bottom: 1px solid var(--rule);">
+        <div class="stack gapy-xs" style="flex: 0 0 120px; padding: 18px 24px; border-right: 1px solid var(--rule); justify-content: center;">
+          <p class="mono">03</p>
+          <p class="h3" style="font-size: 18px;">Data flywheel</p>
+        </div>
+        <div class="stack gapy-xs" style="flex: 1; padding: 18px 28px;">
+          <p class="body-lg"><strong>Every screened call produces labeled training data.</strong> Transcript, verdict, and family feedback on mis-routings feed back into the DistilBERT and Wav2Vec2 retraining loop. Competitors scrape public datasets. Guardian grows from live fraud attempts in real households — a dataset nobody can replicate without already running the service.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="stack gapy-xs" style="flex: 0 0 120px; padding: 18px 24px; border-right: 1px solid var(--rule); justify-content: center;">
+          <p class="mono">04</p>
+          <p class="h3" style="font-size: 18px;">Trust network</p>
+        </div>
+        <div class="stack gapy-xs" style="flex: 1; padding: 18px 28px;">
+          <p class="body-lg"><strong>Adult-child eldercare buyers move through relationships, not ads.</strong> Senior-care coordinators, area agencies on aging, and family-tech influencers recommend what they've seen work. Trust is cumulative and non-portable — a competitor can't buy it, they have to earn it one coordinator at a time.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="src" id="s14-src" style="opacity: 0; margin-top: 6px;">Realistic head start: 12–18 months against a funded competitor. Against Apple specifically: longer, because Apple's product shape is constrained to iPhone and doesn't threaten cross-OS carrier-layer positioning.</p>
+  </div>
+</section>
+
+<!-- SLIDE 15 — ROADMAP -->
+<section class="slide" id="s15">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">15 / 18</span></div>
+  <div class="content stack gapy-md" style="justify-content: center;">
+    <p class="eye" id="s15-eye" style="opacity: 0;">Roadmap · Q2 2026 – Q2 2027</p>
+    <h2 class="h1" id="s15-title" style="opacity: 0;">Twelve months to fifty families, then infrastructure credibility.</h2>
+    <div id="s15-timeline" style="margin-top: 20px; opacity: 0;"></div>
+    <p class="src" id="s15-src" style="opacity: 0;">Milestones funded by the current raise. Dates reflect working-prototype-to-production plan, not aspirational launches.</p>
+  </div>
+</section>
+
+<!-- SLIDE 16 — TEAM -->
+<section class="slide" id="s16">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">16 / 18</span></div>
+  <div class="content stack gapy-md" style="justify-content: center;">
+    <p class="eye" id="s16-eye" style="opacity: 0;">Team · Three builders, one prototype</p>
+    <h2 class="h1" id="s16-title" style="opacity: 0;">Engineers who already shipped the system.</h2>
+
+    <div class="stack" id="s16-list" style="margin-top: 20px; opacity: 0;">
+      <div class="team-row">
+        <div class="stack gapy-xs">
+          <p class="h3">Colin Guenther</p>
+          <p class="mono">Infrastructure · UI</p>
+        </div>
+        <div class="stack gapy-xs">
+          <p class="body-lg">Built the Asterisk PBX, dialplan, and IVR scripts. Designed and shipped both trusted-callers and scam-number databases. Wrote the spoof-detection system and the initial family-dashboard UI.</p>
+        </div>
+        <p class="mono">CSC · TCNJ</p>
+      </div>
+      <div class="team-row">
+        <div class="stack gapy-xs">
+          <p class="h3">Colin Freedlander</p>
+          <p class="mono">Systems · VoIP integration</p>
+        </div>
+        <div class="stack gapy-xs">
+          <p class="body-lg">Stood up the VoIP.ms layer and wired every service together end-to-end. Owns the integration layer that turns four services into one working screening pipeline. Finished the mobile-app polish.</p>
+        </div>
+        <p class="mono">zolvee · GitHub</p>
+      </div>
+      <div class="team-row">
+        <div class="stack gapy-xs">
+          <p class="h3">Matheus Marques</p>
+          <p class="mono">Machine learning</p>
+        </div>
+        <div class="stack gapy-xs">
+          <p class="body-lg">Designed, trained, and shipped both AI models — the DistilBERT scam-text classifier and the Wav2Vec2 voice-authenticity model. Owns the training pipeline, SLURM jobs, and model-serving stack.</p>
+        </div>
+        <p class="mono">ML · TCNJ</p>
+      </div>
+      <div class="team-row">
+        <div class="stack gapy-xs">
+          <p class="h3">Brandon</p>
+          <p class="mono">Bum</p>
+        </div>
+        <div class="stack gapy-xs">
+          <p class="body-lg">Pushed not a single line of code to the github. Dropped his phone in the toilet. Went on a snack run. Spent six hours trying to download one file. Nodded supportively at appropriate intervals. Listed here for completeness and moral support.</p>
+        </div>
+        <p class="mono">—</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 17 — ASK (dark) -->
+<section class="slide dark" id="s17">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">17 / 18</span></div>
+  <div class="content stack gapy-lg" style="justify-content: center;">
+    <div class="stack gapy-md" style="max-width: 840px;">
+      <p class="eye" id="s17-eye" style="opacity: 0;">The ask</p>
+      <h2 class="h1" id="s17-title" style="opacity: 0; color: var(--paper);">Raising pre-seed to turn a working prototype into production infrastructure.</h2>
+    </div>
+
+    <div class="row" id="s17-grid" style="margin-top: 8px; opacity: 0; border-top: 1px solid var(--rule-ink); border-bottom: 1px solid var(--rule-ink); padding: 28px 0;">
+      <div class="ask-cell">
+        <p class="mono" style="color: var(--paper-mu);">AMOUNT</p>
+        <p class="stat-lg" style="color: var(--paper);">$[TBD]</p>
+        <p class="body-text" style="color: var(--paper-mu);">Pre-seed SAFE. Fill before sending.</p>
+      </div>
+      <div class="ask-cell">
+        <p class="mono" style="color: var(--paper-mu);">STAGE</p>
+        <p class="stat-lg" style="color: var(--paper);">Pre-seed</p>
+        <p class="body-text" style="color: var(--paper-mu);">Working prototype, pre-revenue.</p>
+      </div>
+      <div class="ask-cell">
+        <p class="mono" style="color: var(--paper-mu);">RUNWAY</p>
+        <p class="stat-lg" style="color: var(--paper);">12 mo</p>
+        <p class="body-text" style="color: var(--paper-mu);">To production + 50 paid families.</p>
+      </div>
+    </div>
+
+    <div class="stack gapy-sm" id="s17-uses" style="opacity: 0; max-width: 900px;">
+      <p class="mono" style="color: var(--paper-mu);">USE OF FUNDS · MILESTONES</p>
+      <div class="row" style="gap: 12px;"><p class="mono" style="color: var(--paper-mu); min-width: 28px;">01</p><p class="body-lg" style="color: var(--paper);">Production-grade three-tier pipeline · 99% uptime · AWS + VoIP.ms scale-up.</p></div>
+      <div class="row" style="gap: 12px;"><p class="mono" style="color: var(--paper-mu); min-width: 28px;">02</p><p class="body-lg" style="color: var(--paper);">10K labeled training set + cluster compute · retrain both models to target precision/recall.</p></div>
+      <div class="row" style="gap: 12px;"><p class="mono" style="color: var(--paper-mu); min-width: 28px;">03</p><p class="body-lg" style="color: var(--paper);">First 50 paid beta families · real call data · pricing validation.</p></div>
+      <div class="row" style="gap: 12px;"><p class="mono" style="color: var(--paper-mu); min-width: 28px;">04</p><p class="body-lg" style="color: var(--paper);">Compliance, legal, and infrastructure credibility — CIPA counsel, FCC 499-A, OCN, ITG cooperative voice provider status.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 18 — CLOSE -->
+<section class="slide" id="s18">
+  <div class="frame"><span>GUARDIAN</span><span class="frame-r">18 / 18</span></div>
+  <div class="content" style="justify-content: center; align-items: flex-start;">
+    <div class="stack gapy-lg" style="max-width: 900px;">
+      <p class="eye" id="s18-eye" style="opacity: 0;">Thank you</p>
+      <h2 class="h1" id="s18-title" style="opacity: 0; font-size: clamp(48px, 6.4vw, 84px);">Protect the people<br>who raised you.</h2>
+      <hr class="rule" id="s18-rule" style="max-width: 120px; opacity: 0;">
+      <div class="row" id="s18-contact" style="opacity: 0; gap: 48px; margin-top: 8px;">
+        <div class="stack gapy-xs">
+          <p class="mono">CONTACT</p>
+          <p class="body-lg">guardian@suroninc.com</p>
+        </div>
+        <div class="stack gapy-xs">
+          <p class="mono">REPO</p>
+          <p class="body-lg">github.com/suroninc/guardian</p>
+        </div>
+        <div class="stack gapy-xs">
+          <p class="mono">TEAM</p>
+          <p class="body-lg">Colin G. · Colin F. · Matheus · Brandon</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Nav -->
+<div class="nav">
+  <button class="nav-arrow" id="prev">← PREV</button>
+  <div class="nav-dots" id="dots"></div>
+  <button class="nav-arrow" id="next">NEXT →</button>
+  <span id="nav-counter" style="margin-left: 8px; font-variant-numeric: tabular-nums;">01 / 18</span>
 </div>
 
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 11 — Demo
-════════════════════════════════════════════════════════ -->
-<div class="slide">
-  <div style="position:absolute;width:520px;height:520px;border-radius:50%;
-    background:radial-gradient(circle,rgba(52,211,153,0.07) 0%,transparent 70%);
-    filter:blur(90px);pointer-events:none;z-index:0;"></div>
-
-  <div style="position:relative;z-index:1;text-align:center;">
-    <div class="label anim a1" style="justify-content:center;">Live demo</div>
-    <h1 class="grad-text anim a2" style="font-size:78px;">Let's see it work.</h1>
-    <p class="anim a3" style="margin-top:36px;font-size:16px;color:var(--muted-light);
-      display:flex;align-items:center;justify-content:center;gap:8px;">
-      <span class="pulse-dot"></span>
-      Switch to the phone
-    </p>
-    <p class="anim a4" style="margin-top:16px;font-size:13px;color:var(--muted);max-width:400px;text-align:center;">
-      We'll call the Guardian number live and walk through the screening pipeline in real time.
-    </p>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 12 — Cost comparison
-════════════════════════════════════════════════════════ -->
-<div class="slide left">
-  <div class="label anim a1">Unit economics</div>
-  <h2 class="anim a2">The cost of one screened call</h2>
-  <p class="anim a3" style="font-size:15px;color:var(--muted);max-width:650px;margin-top:12px;line-height:1.7;">
-    Because Guardian self-hosts its ML models (DistilBERT, 66M params, 2ms inference) and uses VoIP.ms with 6-second billing, the per-call cost is nearly zero. No API fees. No cloud AI bills.
-  </p>
-
-  <div class="anim a4" style="width:100%;max-width:820px;margin-top:28px;display:flex;flex-direction:column;gap:10px;" id="costViz">
-    <div class="cost-row">
-      <div class="cost-label">Human receptionist</div>
-      <div class="cost-bar-track">
-        <div class="cost-bar-fill" style="width:0%;background:linear-gradient(90deg, rgba(248,113,113,0.5), rgba(248,113,113,0.8));" data-width="100%"></div>
-      </div>
-      <div class="cost-price" style="color:var(--red);">$9.75</div>
-    </div>
-    <div class="cost-row">
-      <div class="cost-label">Smith.ai</div>
-      <div class="cost-bar-track">
-        <div class="cost-bar-fill" style="width:0%;background:linear-gradient(90deg, rgba(251,191,36,0.4), rgba(251,191,36,0.7));" data-width="26.7%"></div>
-      </div>
-      <div class="cost-price" style="color:var(--amber);">$2.60</div>
-    </div>
-    <div class="cost-row">
-      <div class="cost-label">GPT-4o Realtime</div>
-      <div class="cost-bar-track">
-        <div class="cost-bar-fill" style="width:0%;background:linear-gradient(90deg, rgba(96,165,250,0.4), rgba(96,165,250,0.7));" data-width="16.4%"></div>
-      </div>
-      <div class="cost-price" style="color:var(--blue);">$1.60</div>
-    </div>
-    <div class="cost-row">
-      <div class="cost-label">Claude + Whisper</div>
-      <div class="cost-bar-track">
-        <div class="cost-bar-fill" style="width:0%;background:rgba(148,163,184,0.5);" data-width="2.5%"></div>
-      </div>
-      <div class="cost-price" style="color:var(--muted-light);">$0.003</div>
-    </div>
-    <div class="cost-row">
-      <div class="cost-label" style="color:var(--green);font-weight:700;">Guardian</div>
-      <div class="cost-bar-track" style="border:1px solid rgba(52,211,153,0.1);">
-        <div class="cost-bar-fill guardian-bar" style="width:0%;background:var(--green);" data-width="0.5%"></div>
-      </div>
-      <div class="cost-price" style="color:var(--green);font-weight:800;">$0.00018</div>
-    </div>
-  </div>
-
-  <div class="anim a5" style="margin-top:24px;display:inline-flex;align-items:center;gap:12px;
-    padding:12px 20px;border-radius:10px;background:rgba(52,211,153,0.04);
-    border:1px solid rgba(52,211,153,0.12);">
-    <span style="font-size:20px;font-weight:900;color:var(--green);">54,000x</span>
-    <span style="font-size:13px;color:var(--muted-light);">cheaper than a human receptionist</span>
-  </div>
-  <p class="source">VoIP.ms 6-second billing · ML inference + transcription self-hosted at $0</p>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 13 — ROI
-════════════════════════════════════════════════════════ -->
-<div class="slide">
-  <div style="position:absolute;width:700px;height:500px;border-radius:50%;
-    background:radial-gradient(circle,rgba(52,211,153,0.06) 0%,transparent 70%);
-    filter:blur(100px);pointer-events:none;top:20%;left:15%;z-index:0;"></div>
-
-  <div style="position:relative;z-index:1;text-align:center;max-width:820px;">
-    <div class="label anim a1" style="justify-content:center;">Return on investment</div>
-    <div class="hero-cents anim a2">6&#162;</div>
-    <p class="anim a3" style="font-size:22px;font-weight:500;color:var(--muted-light);margin-top:16px;letter-spacing:-0.3px;">
-      protects one person for an entire year
-    </p>
-    <p class="anim a4" style="font-size:13px;color:var(--muted);margin-top:10px;">
-      Less than a gumball. Less than a paperclip. Less than a postage stamp.
-    </p>
-    <div class="anim a5" style="margin-top:40px;padding:28px 48px;border-radius:16px;
-      background:rgba(255,255,255,0.025);border:1px solid var(--border);display:inline-block;">
-      <p style="font-size:12px;color:var(--muted);text-transform:uppercase;
-        letter-spacing:2.5px;font-weight:700;">One prevented scam ($38K) pays for Guardian for</p>
-      <div style="font-size:52px;font-weight:900;letter-spacing:-3px;color:var(--text);margin-top:8px;">
-        <span class="count-up" data-target="633000" data-suffix="+">0</span> years
-      </div>
-    </div>
-    <p class="source centered" style="margin-top:20px;">336 calls/year x $0.00018 = $0.06/year</p>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 14 — Market
-════════════════════════════════════════════════════════ -->
-<div class="slide">
-  <div class="label anim a1" style="justify-content:center;">Market opportunity</div>
-  <h2 class="anim a2" style="text-align:center;">$3B addressable market</h2>
-
-  <div class="anim a3" style="display:flex;align-items:center;gap:72px;margin-top:40px;width:100%;max-width:900px;">
-    <div class="market-viz">
-      <div class="market-ring" style="width:280px;height:280px;
-        border-color:rgba(255,255,255,0.22);
-        background:radial-gradient(circle,rgba(255,255,255,0.03) 0%,transparent 70%);"></div>
-      <div class="market-ring" style="width:188px;height:188px;
-        border-color:rgba(52,211,153,0.5);
-        background:radial-gradient(circle,rgba(52,211,153,0.08) 0%,transparent 70%);
-        box-shadow:0 0 30px rgba(52,211,153,0.12);"></div>
-      <div class="market-ring" style="width:80px;height:80px;
-        border-color:rgba(96,165,250,0.8);
-        background:radial-gradient(circle,rgba(96,165,250,0.2) 0%,transparent 70%);
-        box-shadow:0 0 24px rgba(96,165,250,0.25);"></div>
-      <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);
-        font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
-        color:rgba(255,255,255,0.45);">TAM</div>
-      <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);
-        font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
-        color:rgba(52,211,153,0.75);">SAM</div>
-      <div style="position:absolute;top:110px;left:50%;transform:translateX(-50%);
-        font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
-        color:rgba(96,165,250,0.95);">SOM</div>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:26px;flex:1;">
-      <div style="display:flex;align-items:flex-start;gap:18px;">
-        <div style="width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.15);
-          flex-shrink:0;margin-top:5px;border:1px solid rgba(255,255,255,0.15);"></div>
-        <div>
-          <div style="font-size:32px;font-weight:900;letter-spacing:-1.5px;color:var(--text);">$6.7B</div>
-          <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
-            color:var(--muted);margin-top:2px;">TAM</div>
-          <div style="font-size:13px;color:var(--muted-light);margin-top:4px;line-height:1.6;">56M Americans 65+ @ $10/mo</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:18px;">
-        <div style="width:14px;height:14px;border-radius:50%;background:rgba(52,211,153,0.5);
-          flex-shrink:0;margin-top:5px;box-shadow:0 0 8px rgba(52,211,153,0.4);"></div>
-        <div>
-          <div style="font-size:32px;font-weight:900;letter-spacing:-1.5px;color:var(--green);">$3.0B</div>
-          <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
-            color:var(--green);opacity:0.7;margin-top:2px;">SAM</div>
-          <div style="font-size:13px;color:var(--muted-light);margin-top:4px;line-height:1.6;">25M elderly households + adult children</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:18px;">
-        <div style="width:14px;height:14px;border-radius:50%;background:rgba(96,165,250,0.6);
-          flex-shrink:0;margin-top:5px;box-shadow:0 0 8px rgba(96,165,250,0.4);"></div>
-        <div>
-          <div style="font-size:32px;font-weight:900;letter-spacing:-1.5px;color:var(--blue);">$6-12M</div>
-          <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
-            color:var(--blue);opacity:0.7;margin-top:2px;">SOM Year 1</div>
-          <div style="font-size:13px;color:var(--muted-light);margin-top:4px;line-height:1.6;">50-100K early adopters @ $10/mo</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <p class="source">Senior care tech market: $53-160B (2025). Fastest-growing US demographic.</p>
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     SLIDE 15 — Team
-════════════════════════════════════════════════════════ -->
-<div class="slide">
-  <div style="position:absolute;width:750px;height:550px;border-radius:50%;
-    background:radial-gradient(circle,rgba(52,211,153,0.055) 0%,rgba(96,165,250,0.035) 50%,transparent 70%);
-    filter:blur(110px);pointer-events:none;z-index:0;"></div>
-
-  <div style="position:relative;z-index:1;text-align:center;width:100%;max-width:860px;">
-    <div class="label anim a1" style="justify-content:center;">The team</div>
-    <h1 class="grad-green anim a2" style="font-size:88px;">Guardian</h1>
-    <p class="subtitle anim a3" style="text-align:center;margin:16px auto 0;">
-      Protecting the people you love.
-    </p>
-
-    <div class="anim a4" style="display:flex;gap:28px;margin-top:48px;flex-wrap:wrap;justify-content:center;">
-      <div style="text-align:center;flex:0 0 175px;">
-        <div class="avatar" style="background:radial-gradient(135deg,rgba(52,211,153,0.18),rgba(52,211,153,0.03));
-          color:var(--green);border-color:rgba(52,211,153,0.2);">CG</div>
-        <div style="font-size:15px;font-weight:700;">Colin G</div>
-        <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1.5px;
-          text-transform:uppercase;margin-top:4px;">Infrastructure</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.65;">
-          Asterisk · Spoof detection<br>Trusted number DB
-        </div>
-      </div>
-      <div style="text-align:center;flex:0 0 175px;">
-        <div class="avatar" style="background:radial-gradient(135deg,rgba(96,165,250,0.18),rgba(96,165,250,0.03));
-          color:var(--blue);border-color:rgba(96,165,250,0.2);">CF</div>
-        <div style="font-size:15px;font-weight:700;">Colin F</div>
-        <div style="font-size:10px;font-weight:700;color:var(--blue);letter-spacing:1.5px;
-          text-transform:uppercase;margin-top:4px;">Backend</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.65;">
-          Docker · Screening pipeline<br>REST API
-        </div>
-      </div>
-      <div style="text-align:center;flex:0 0 175px;">
-        <div class="avatar" style="background:radial-gradient(135deg,rgba(251,191,36,0.18),rgba(251,191,36,0.03));
-          color:var(--amber);border-color:rgba(251,191,36,0.2);">M</div>
-        <div style="font-size:15px;font-weight:700;">Matheus</div>
-        <div style="font-size:10px;font-weight:700;color:var(--amber);letter-spacing:1.5px;
-          text-transform:uppercase;margin-top:4px;">ML &amp; Audio</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.65;">
-          Voice classifier<br>Wav2Vec2
-        </div>
-      </div>
-      <div style="text-align:center;flex:0 0 175px;">
-        <div class="avatar" style="background:radial-gradient(135deg,rgba(248,113,113,0.16),rgba(248,113,113,0.03));
-          color:var(--red);border-color:rgba(248,113,113,0.2);">B</div>
-        <div style="font-size:15px;font-weight:700;">Brandon</div>
-        <div style="font-size:10px;font-weight:700;color:var(--red);letter-spacing:1.5px;
-          text-transform:uppercase;margin-top:4px;">Data &amp; Training</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.65;">
-          10K training dataset<br>Data pipeline
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-</div><!-- /deck -->
-
-<div class="brand" aria-hidden="true">Guardian</div>
-
-<nav class="nav">
-  <button onclick="prev()" aria-label="Previous">&larr;</button>
-  <span class="counter" id="counter">1 / 15</span>
-  <button onclick="next()" aria-label="Next">&rarr;</button>
-</nav>
-
-<script>
-/* ── Slide engine ─────────────────────────────────────────── */
-const slides   = Array.from(document.querySelectorAll('.slide'));
-const progress = document.getElementById('progress');
-const counter  = document.getElementById('counter');
-let current    = 0;
-let animating  = false;
-let queued     = null;
-
-function show(i) {
-  const target = Math.max(0, Math.min(i, slides.length - 1));
-  if (target === current) return;
-
-  if (animating) { queued = target; return; }
-
-  animating = true;
-  const prev = slides[current];
-  prev.classList.add('exit');
-  setTimeout(() => {
-    prev.classList.remove('active', 'exit');
-    animating = false;
-    if (queued !== null) { const q = queued; queued = null; show(q); }
-  }, 460);
-
-  current = target;
-  slides[current].classList.add('active');
-  counter.textContent = `${current + 1} / ${slides.length}`;
-  progress.style.width = `${((current + 1) / slides.length) * 100}%`;
-
-  requestAnimationFrame(() => triggerSlide(current));
-}
-
-function next() { show(current + 1); }
-function prev() { show(current - 1); }
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
-  if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
-  if (e.key === 'ArrowUp')    { e.preventDefault(); prev(); }
-  if (e.key === 'ArrowDown')  { e.preventDefault(); next(); }
-});
-
-let touchX = 0;
-document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
-document.addEventListener('touchend', e => {
-  const d = e.changedTouches[0].clientX - touchX;
-  if (Math.abs(d) > 50) d < 0 ? next() : prev();
-}, { passive: true });
-
-/* ── Count-up ─────────────────────────────────────────────── */
-function countUp(el) {
-  const target   = parseFloat(el.dataset.target);
-  const decimals = parseInt(el.dataset.decimals || '0');
-  const suffix   = el.dataset.suffix || '';
-  const dur      = 1400;
-  const t0       = performance.now();
-  (function step(now) {
-    const p = Math.min((now - t0) / dur, 1);
-    const ease = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
-    const val = decimals > 0
-      ? (ease * target).toFixed(decimals)
-      : Math.round(ease * target).toLocaleString();
-    el.textContent = val + suffix;
-    if (p < 1) requestAnimationFrame(step);
-  })(t0);
-}
-
-/* ── Bar chart animation ──────────────────────────────────── */
-function animateGrowthBars() {
-  const groups = document.querySelectorAll('#growthBars .bar-group');
-  groups.forEach((g, i) => {
-    const fill = g.querySelector('.bar-fill');
-    const h = g.dataset.height;
-    fill.style.height = '0%';
-    setTimeout(() => { fill.style.height = h + '%'; }, 80 + i * 80);
-  });
-}
-
-/* ── SVG donut animation ──────────────────────────────────── */
-function animateFunnelDonut() {
-  const segments = document.querySelectorAll('#funnelDonut .donut-segment');
-  segments.forEach((seg, i) => {
-    const target = seg.dataset.target;
-    seg.style.strokeDashoffset = '100';
-    setTimeout(() => { seg.style.strokeDashoffset = target; }, 100 + i * 150);
-  });
-}
-
-/* ── Cost bars animation ──────────────────────────────────── */
-function animateCostBars() {
-  const bars = document.querySelectorAll('#costViz .cost-bar-fill');
-  bars.forEach((bar, i) => {
-    const target = bar.dataset.width;
-    bar.style.width = '0%';
-    setTimeout(() => { bar.style.width = target; }, 60 + i * 90);
-  });
-}
-
-/* ── Walkthrough step animation ───────────────────────────── */
-function animateWalkthrough() {
-  const steps = document.querySelectorAll('.walkthrough .wt-step');
-  steps.forEach((step, i) => {
-    step.style.opacity = '0';
-    step.style.transform = 'translateX(-16px)';
-    step.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-    setTimeout(() => {
-      step.style.opacity = '1';
-      step.style.transform = 'translateX(0)';
-    }, 120 + i * 120);
-  });
-}
-
-/* ── Slide trigger ────────────────────────────────────────── */
-function triggerSlide(idx) {
-  const slide = slides[idx];
-
-  // Count-up numbers
-  slide.querySelectorAll('.count-up').forEach(el => {
-    el.textContent = el.dataset.decimals > 0 ? '0.0' : '0';
-    countUp(el);
-  });
-
-  // Slide-specific animations (adjusted for new slide order)
-  if (idx === 2) animateGrowthBars();       // Growth chart
-  if (idx === 7) animateWalkthrough();       // Call walkthrough
-  if (idx === 8) animateFunnelDonut();       // 90% donut
-  if (idx === 11) animateCostBars();         // Cost comparison
-}
-
-// Init first slide
-requestAnimationFrame(() => triggerSlide(0));
-</script>
-
+<script src="pitch.js"></script>
 </body>
 </html>
